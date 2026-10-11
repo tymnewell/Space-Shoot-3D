@@ -51,6 +51,16 @@
             color: #ffcc00;
         }
 
+        .hud-top-right {
+            text-align: right;
+        }
+
+        #high-score-hud {
+            color: #00ffff;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
         .hud-bottom {
             position: absolute;
             bottom: 20px;
@@ -132,6 +142,7 @@
             margin-top: 15px;
             transition: all 0.2s;
             box-shadow: 4px 4px 0px #000;
+            pointer-events: auto; /* Ensure buttons are clickable */
         }
 
         button:hover {
@@ -150,9 +161,13 @@
             width: 100%;
             text-align: center;
             animation: scrollUp 20s linear forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .credits-scroll h2 { color: #00ffff; margin-bottom: 30px; font-size: 20px; }
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
+        .credits-logo { max-width: 400px; margin-bottom: 20px; }
 
         @keyframes scrollUp {
             0% { bottom: -110%; }
@@ -168,7 +183,10 @@
     <div id="hud">
         <div class="hud-top">
             <div id="score-display">SCORE: 0</div>
-            <div id="level-display">LEVEL: 1</div>
+            <div class="hud-top-right">
+                <div id="high-score-hud">HI-SCORE: 0</div>
+                <div id="level-display">LEVEL: 1</div>
+            </div>
         </div>
         <div class="hud-bottom">
             <div id="health-display">HEALTH: 100%</div>
@@ -179,7 +197,9 @@
 
     <!-- Menus -->
     <div id="start-menu" class="overlay">
-        <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D">
+        <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
+        <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
+        
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
         <div class="sub-message">
@@ -190,8 +210,10 @@
     </div>
 
     <div id="game-over-menu" class="overlay" style="display: none;">
-        <div class="logo-img" style="color: #ff0000; font-size:40px; font-weight:bold; text-shadow: 4px 4px 0px #550000;">SHIP DESTROYED</div>
+        <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
+        <div class="logo-img" style="color: #ff0000; font-size:40px; font-weight:bold; text-shadow: 4px 4px 0px #550000; margin-top: 20px;">SHIP DESTROYED</div>
         <div class="message" id="final-score">SCORE: 0</div>
+        <div class="message" id="game-over-high-score" style="color: #00ffff; font-size: 14px; margin-bottom: 20px;">HIGH SCORE: 0</div>
         <button id="restart-btn">RETRY</button>
     </div>
 
@@ -202,14 +224,14 @@
     <div id="credits-screen" class="overlay">
         <div class="credits-container">
             <div class="credits-scroll">
+                <img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
                 <h2>MISSION ACCOMPLISHED</h2>
                 <p>EARTH IS SAVED</p>
+                <h3 id="credits-final-score" style="color: #ffcc00; margin: 20px 0;">FINAL SCORE: 0</h3>
+                <h3 id="credits-high-score" style="color: #00ffff; margin-bottom: 40px; font-size: 14px;">HIGH SCORE: 0</h3>
                 <p><br><br></p>
                 <p>PRODUCED BY</p>
                 <p>Newell Web Solutions</p>
-                <p><br></p>
-                <p>DIRECTOR</p>
-                <p>You</p>
                 <p><br></p>
                 <p>PROGRAMMING</p>
                 <p>Gemini AI & Newell Web Solutions</p>
@@ -217,8 +239,6 @@
                 <p>LEVEL DESIGN & ART</p>
                 <p>Gemini Image Generator</p>
                 <p><br></p>
-                <p>SPECIAL THANKS</p>
-                <p>N64 / Star Fox Tribute Team</p>
                 <p><br></p>
                 <p>THANKS FOR PLAYING!</p>
                 <p>SPACE SHOOT 3D</p>
@@ -254,6 +274,7 @@
         
         let state = 'MENU'; // MENU, PLAYING, TRANSITION, CINEMATIC, CREDITS
         let score = 0;
+        let highScore = localStorage.getItem('spaceShootHighScore') || 0;
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
@@ -272,7 +293,6 @@
         let cameraView = '3RD'; // '3RD' (Behind) or '1ST' (Cockpit View)
         let isScreenShaking = 0;
 
-        // Texture Dictionary
         const textures = {};
 
         // DOM Elements
@@ -281,13 +301,20 @@
             over: document.getElementById('game-over-menu'),
             hud: document.getElementById('hud'),
             score: document.getElementById('score-display'),
+            highScore: document.getElementById('high-score-hud'),
             health: document.getElementById('health-display'),
             lvl: document.getElementById('level-display'),
             transition: document.getElementById('level-transition'),
             lvlText: document.getElementById('level-text'),
             credits: document.getElementById('credits-screen'),
             finalScore: document.getElementById('final-score'),
-            camMode: document.getElementById('camera-display')
+            overHighScore: document.getElementById('game-over-high-score'),
+            creditsFinalScore: document.getElementById('credits-final-score'),
+            creditsHighScore: document.getElementById('credits-high-score'),
+            camMode: document.getElementById('camera-display'),
+            btnStart: document.getElementById('start-btn'),
+            btnRestart: document.getElementById('restart-btn'),
+            btnCreditsRestart: document.getElementById('credits-restart-btn')
         };
 
         // Procedural generation as fallback 
@@ -352,6 +379,7 @@
                 } else {
                     finalUrl = generatePixelTexture(key);
                 }
+                
                 textures[key] = textureLoader.load(finalUrl, 
                     undefined, 
                     undefined, 
@@ -380,13 +408,17 @@
             createEnvironment();
             createPlayer();
 
+            // Set initial high score display
+            ui.highScore.innerText = `HI-SCORE: ${highScore}`;
+
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
             
-            document.getElementById('start-btn').addEventListener('click', () => startLevel(1));
-            document.getElementById('restart-btn').addEventListener('click', () => startLevel(1));
-            document.getElementById('credits-restart-btn').addEventListener('click', resetToMenu);
+            // Safe event listener attachment
+            if(ui.btnStart) ui.btnStart.addEventListener('click', () => startLevel(1));
+            if(ui.btnRestart) ui.btnRestart.addEventListener('click', () => startLevel(1));
+            if(ui.btnCreditsRestart) ui.btnCreditsRestart.addEventListener('click', resetToMenu);
 
             clock = new THREE.Clock();
             animate();
@@ -523,6 +555,14 @@
             }
         }
 
+        function checkHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('spaceShootHighScore', highScore);
+                ui.highScore.innerText = `HI-SCORE: ${highScore}`;
+            }
+        }
+
         function startLevel(lvlNum) {
             level = lvlNum;
             killsInLevel = 0;
@@ -626,6 +666,15 @@
         function triggerEnding() {
             state = 'CINEMATIC';
             ui.hud.style.display = 'none';
+            checkHighScore();
+            ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
+            ui.creditsHighScore.innerText = `HIGH SCORE: ${highScore}`;
+            
+            // Reset credits animation by forcing a reflow
+            const scrollEl = document.querySelector('.credits-scroll');
+            scrollEl.style.animation = 'none';
+            scrollEl.offsetHeight; /* trigger reflow */
+            scrollEl.style.animation = null; 
         }
 
         function update(dt) {
@@ -841,13 +890,23 @@
             ui.score.innerText = `SCORE: ${score}`;
             ui.health.innerText = `HEALTH: ${Math.max(0, health)}%`;
             ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00';
+            
+            // Live high score update check
+            if (score > highScore) {
+                ui.highScore.style.color = '#ff00ff';
+                ui.highScore.innerText = `HI-SCORE: ${score}`;
+            }
         }
 
         function gameOver() {
             state = 'MENU';
             ui.hud.style.display = 'none';
             ui.over.style.display = 'flex';
-            ui.finalScore.innerText = `FINAL SCORE: ${score}`;
+            
+            checkHighScore();
+            ui.finalScore.innerText = `SCORE: ${score}`;
+            ui.overHighScore.innerText = `HIGH SCORE: ${highScore}`;
+            
             createExplosion(playerShip.position, 0xff0000);
             playerShip.position.set(0, -100, 0); 
         }
@@ -892,6 +951,7 @@
             renderer.render(scene, camera);
         }
 
+        // Initialize on load
         window.onload = init;
     </script>
 </body>
