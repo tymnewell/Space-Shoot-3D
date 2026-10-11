@@ -176,7 +176,7 @@
             ufo: 'ufo.png',
             mothership: 'mothership.png',
             earth: 'earth.png',
-            energy: 'energy.png' // New Energy Pod Sprite
+            energy: 'energy.png' 
         };
 
         const AUDIO_FILES = {
@@ -201,14 +201,25 @@
         let killsInLevel = 0;
         const KILLS_TO_ADVANCE = 15;
 
-        // Initialize Hall of Fame High Scores
-        let highScores = JSON.parse(localStorage.getItem('spaceShootHighScores')) || [
-            { name: "NWS", score: 10000 },
-            { name: "GEM", score: 8000 },
-            { name: "FOX", score: 5000 },
-            { name: "AAA", score: 2000 },
-            { name: "ZZZ", score: 1000 }
-        ];
+        // SAFE High Score Loading (Prevents crashing from old cache)
+        let highScores = [];
+        try {
+            const stored = localStorage.getItem('spaceShootHighScores');
+            if (stored) {
+                highScores = JSON.parse(stored);
+                if (!Array.isArray(highScores)) throw new Error("Invalid format");
+            } else {
+                throw new Error("No scores yet");
+            }
+        } catch (e) {
+            highScores = [
+                { name: "NWS", score: 10000 },
+                { name: "GEM", score: 8000 },
+                { name: "FOX", score: 5000 },
+                { name: "AAA", score: 2000 },
+                { name: "ZZZ", score: 1000 }
+            ];
+        }
 
         let scene, camera, renderer, clock, textureLoader;
         let playerShip, cockpitMesh;
@@ -217,7 +228,7 @@
         const lasers = [];
         const enemies = [];
         const particles = [];
-        const energyPods = []; // Array for active energy drops
+        const energyPods = []; 
         
         const keys = { w: false, a: false, s: false, d: false, space: false };
         let lastFired = 0;
@@ -265,7 +276,6 @@
                 ctx.fillStyle = '#111'; ctx.fillRect(0, 180, 512, 76);
                 ctx.fillStyle = '#00ff00'; ctx.fillRect(220, 190, 72, 10);
             } else if (type === 'energy') {
-                // Bright Green Cross
                 ctx.fillStyle = '#00ff00'; ctx.fillRect(24, 8, 16, 48); ctx.fillRect(8, 24, 48, 16);
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 12, 8, 40); ctx.fillRect(12, 28, 40, 8);
             } else if (type === 'asteroid') {
@@ -282,7 +292,7 @@
                 ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(200, 200, 70, 0, Math.PI*2); ctx.arc(320, 260, 90, 0, Math.PI*2); ctx.fill();
             } else {
-                ctx.fillStyle = '#f0f'; ctx.fillRect(16, 16, 32, 32); // generic fallback
+                ctx.fillStyle = '#f0f'; ctx.fillRect(16, 16, 32, 32); 
             }
 
             return canvas.toDataURL();
@@ -296,7 +306,6 @@
                     textures[key] = textureLoader.load(generatePixelTexture(key));
                 });
                 textures[key].magFilter = THREE.NearestFilter;
-                textures[key].colorSpace = THREE.SRGBColorSpace;
             }
         }
 
@@ -345,7 +354,8 @@
             createEnvironment();
             createPlayer();
 
-            ui.highScore.innerText = `HI-SCORE: ${highScores[0].score}`;
+            // Safe high score display load
+            if(highScores.length > 0) ui.highScore.innerText = `HI-SCORE: ${highScores[0].score}`;
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
@@ -455,7 +465,8 @@
         }
 
         function registerHighScore() {
-            if (score > highScores[highScores.length - 1].score || highScores.length < 5) {
+            const lowestScore = highScores.length > 0 ? highScores[highScores.length - 1].score : 0;
+            if (score > lowestScore || highScores.length < 5) {
                 let name = prompt("NEW HIGH SCORE! Enter your initials (3 letters):", "AAA");
                 if (name) {
                     name = name.substring(0, 3).toUpperCase();
@@ -507,10 +518,8 @@
         }
 
         function levelDirector(dt) {
-            // Random Energy Drop 
             if (Math.random() < 0.003 && state === 'PLAYING') spawnEnergyPod();
 
-            // Enemy Spawning
             if (enemies.length < 5 + level && Math.random() < 0.032 && state === 'PLAYING') {
                 if (level === 1 || level === 5) spawnEnemy('enemyBlueGreen', 7, 1, 'straight');
                 else if (level === 2 || level === 6) spawnEnemy(Math.random() < 0.5 ? 'enemyRed' : 'asteroid', Math.random() < 0.5 ? 7 : 11, Math.random() < 0.5 ? 1 : 4, Math.random() < 0.5 ? 'weave' : 'obstacle');
@@ -526,4 +535,210 @@
 
             if (level !== 4 && level !== 8 && level !== 9) { if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(level + 1); } 
             else if (level === 4 || level === 8) { if (enemies.length === 0 && killsInLevel > 0) startLevel(level + 1); } 
-            else if (level === 9) { if (enemies.length === 0 && killsIn
+            else if (level === 9) { if (enemies.length === 0 && killsInLevel > 0) triggerEnding(); }
+        }
+
+        function triggerEnding() {
+            state = 'CINEMATIC'; ui.hud.style.display = 'none'; ui.start.style.display = 'none'; ui.over.style.display = 'none';
+            stopAllMusic(); playSound('endMusic');
+            
+            setTimeout(() => {
+                registerHighScore();
+                ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
+                const scrollEl = document.querySelector('.credits-scroll');
+                scrollEl.style.animation = 'none'; scrollEl.offsetHeight; scrollEl.style.animation = null; 
+            }, 1000);
+        }
+
+        function update(dt) {
+            if (state === 'MENU' || state === 'CREDITS') return;
+
+            if (isScreenShaking > 0) {
+                isScreenShaking -= dt * 3;
+                camera.position.x += (Math.random() - 0.5) * isScreenShaking * 3.5;
+                camera.position.y += (Math.random() - 0.5) * isScreenShaking * 3.5;
+            } else { updateCameraPosition(); }
+
+            const positions = backgroundStars.geometry.attributes.position.array;
+            for(let i=2; i<positions.length; i+=3) {
+                positions[i] += 230 * dt; if(positions[i] > 120) positions[i] = -900;
+            }
+            backgroundStars.geometry.attributes.position.needsUpdate = true;
+
+            if(asteroidFieldGrp.visible) {
+                asteroidFieldGrp.children.forEach(rock => {
+                    rock.position.z += 175 * dt;
+                    if(rock.position.z > 60) { rock.position.z = -700; rock.position.x = (Math.random()-0.5)*260; }
+                });
+            }
+
+            if (state === 'TRANSITION') { playerShip.position.y += (0 - playerShip.position.y) * 2.2 * dt; return; }
+            if (state === 'CINEMATIC') {
+                playerShip.position.z -= 45 * dt; playerShip.position.y -= 10 * dt; playerShip.scale.multiplyScalar(0.992);
+                if(playerShip.position.z < -260) { state = 'CREDITS'; ui.credits.style.display = 'flex'; }
+                return;
+            }
+
+            levelDirector(dt);
+
+            let targetRotZ = 0, targetRotX = 0;
+            const bX = cameraView === '1ST' ? BOUNDS.x * 0.9 : BOUNDS.x; const bY = cameraView === '1ST' ? BOUNDS.y * 0.9 : BOUNDS.y;
+
+            if (keys.a && playerShip.position.x > -bX) { playerShip.position.x -= SHIP_SPEED * dt; targetRotZ = 0.35; }
+            if (keys.d && playerShip.position.x < bX) { playerShip.position.x += SHIP_SPEED * dt; targetRotZ = -0.35; }
+            if (keys.w && playerShip.position.y < bY) { playerShip.position.y += SHIP_SPEED * dt; targetRotX = -0.28; }
+            if (keys.s && playerShip.position.y > -bY) { playerShip.position.y -= SHIP_SPEED * dt; targetRotX = 0.28; }
+
+            if (cameraView === '1ST') { camera.position.x = playerShip.position.x; camera.position.y = playerShip.position.y; } 
+            else { camera.position.x += (playerShip.position.x * 0.15 - camera.position.x) * 4 * dt; }
+            
+            playerShip.rotation.z += (targetRotZ - playerShip.rotation.z) * 9 * dt; playerShip.rotation.x += (targetRotX - playerShip.rotation.x) * 9 * dt;
+
+            if (keys.space && clock.getElapsedTime() - lastFired > FIRE_RATE) {
+                spawnLaser(false, playerShip, {x: -2.8, y: -0.5, z: -2}); spawnLaser(false, playerShip, {x: 2.8, y: -0.5, z: -2});
+                lastFired = clock.getElapsedTime(); playSound('shoot');
+            }
+
+            for (let i = energyPods.length - 1; i >= 0; i--) {
+                const pod = energyPods[i];
+                pod.time += dt; pod.mesh.position.z += pod.speed * dt; pod.mesh.position.y += Math.sin(pod.time * 4) * 5 * dt; 
+
+                if (pod.mesh.position.distanceTo(playerShip.position) < 5.5) {
+                    healDamage(20); scene.remove(pod.mesh); energyPods.splice(i, 1); continue;
+                }
+                if (pod.mesh.position.z > 60) { scene.remove(pod.mesh); energyPods.splice(i, 1); }
+            }
+
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                const l = lasers[i]; l.mesh.position.z -= l.speed * dt;
+                if (l.isEnemy && l.mesh.position.distanceTo(playerShip.position) < 3.8) {
+                    takeDamage(10); scene.remove(l.mesh); lasers.splice(i, 1); continue;
+                }
+                if (l.mesh.position.z < -650 || l.mesh.position.z > 80) { scene.remove(l.mesh); lasers.splice(i, 1); }
+            }
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i]; e.time += dt;
+
+                if (e.behavior === 'straight' || e.behavior === 'obstacle') { e.mesh.position.z += (e.behavior === 'obstacle' ? 70 : 62) * dt; } 
+                else if (e.behavior === 'weave') { e.mesh.position.z += 55 * dt; e.mesh.position.x += Math.sin(e.time * 2.8) * 32 * dt; } 
+                else if (e.behavior === 'spider') { e.mesh.position.z += 60 * dt; e.mesh.position.y += Math.cos(e.time * 3.5) * 14 * dt; e.mesh.position.x += Math.sin(e.time * 1.5) * 20 * dt; }
+                else if (e.behavior === 'chase') { e.mesh.position.z += 72 * dt; e.mesh.position.x += Math.sign(playerShip.position.x - e.mesh.position.x) * 22 * dt; } 
+                else if (e.behavior.includes('boss')) {
+                    e.mesh.position.z += (-160 - e.mesh.position.z) * 2.5 * dt; e.mesh.position.x = Math.sin(e.time * 0.8) * 32;
+                    if (e.behavior === 'mothership_boss') e.mesh.position.y = Math.cos(e.time * 0.5) * 12;
+                    else if (e.behavior === 'boss_minion') { e.mesh.position.x += Math.cos(e.time * 2) * 16; e.mesh.position.y = Math.sin(e.time * 3) * 12; }
+                    
+                    if(Math.random() < (e.behavior === 'mothership_boss' ? 0.045 : 0.022)) spawnLaser(true, e.mesh, {x: (Math.random()-0.5)*15, y:-4, z:6});
+                }
+
+                if (!e.behavior.includes('boss') && e.behavior !== 'obstacle' && Math.random() < 0.005) {
+                    spawnLaser(true, e.mesh, {x: 0, y: -1, z: 2});
+                }
+
+                if (e.mesh.position.distanceTo(playerShip.position) < (e.behavior.includes('boss') ? 22 : 4.5)) {
+                    takeDamage(e.behavior === 'obstacle' ? 25 : 15); createExplosion(e.mesh.position, 0xffaa00);
+                    if (!e.behavior.includes('boss')) { scene.remove(e.mesh); enemies.splice(i, 1); }
+                    continue;
+                }
+
+                let isDead = false;
+                for (let j = lasers.length - 1; j >= 0; j--) {
+                    const l = lasers[j];
+                    if (!l.isEnemy && l.mesh.position.distanceTo(e.mesh.position) < (e.behavior.includes('boss') ? 16 : 4.5)) {
+                        createExplosion(l.mesh.position, 0xffbb00); scene.remove(l.mesh); lasers.splice(j, 1);
+                        
+                        e.hp--; e.mesh.material.color.setHex(0xff3333); setTimeout(() => { if(e && e.mesh) e.mesh.material.color.setHex(0xffffff); }, 80);
+
+                        if (e.hp <= 0) {
+                            createExplosion(e.mesh.position, 0x00ffff); createExplosion(e.mesh.position, 0xff00ff);
+                            scene.remove(e.mesh); enemies.splice(i, 1); score += e.maxHp * 100; killsInLevel++;
+                            updateHUD(); isDead = true;
+                        }
+                        break;
+                    }
+                }
+
+                if (!isDead && e.mesh.position.z > 60) { scene.remove(e.mesh); enemies.splice(i, 1); }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i]; p.mesh.position.addScaledVector(p.vel, dt); p.life -= dt * 2.8; p.mesh.scale.setScalar(p.life);
+                if (p.life <= 0) { scene.remove(p.mesh); particles.splice(i, 1); }
+            }
+        }
+
+        function takeDamage(amt) {
+            health -= amt; isScreenShaking = 0.8; playSound('hit');
+            ui.health.style.color = '#ff0000'; setTimeout(() => ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00', 250);
+            updateHUD(); if(health <= 0) gameOver();
+        }
+
+        function healDamage(amt) {
+            health = Math.min(100, health + amt); playSound('heal');
+            ui.health.style.color = '#00ff00'; ui.health.style.textShadow = '0px 0px 15px #00ff00';
+            setTimeout(() => { ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00'; ui.health.style.textShadow = 'none'; }, 300);
+            updateHUD();
+        }
+
+        function updateHUD() {
+            ui.score.innerText = `SCORE: ${score}`; ui.health.innerText = `HEALTH: ${Math.max(0, health)}%`;
+            if (highScores.length > 0 && score > highScores[0].score) { ui.highScore.style.color = '#ff00ff'; ui.highScore.innerText = `HI-SCORE: ${score}`; }
+        }
+
+        function gameOver() {
+            state = 'MENU'; ui.hud.style.display = 'none'; ui.over.style.display = 'flex';
+            stopAllMusic(); playSound('endMusic');
+            
+            setTimeout(() => {
+                registerHighScore();
+                ui.finalScore.innerText = `SCORE: ${score}`;
+            }, 500);
+            
+            createExplosion(playerShip.position, 0xff0000); playerShip.position.set(0, -100, 0); 
+        }
+
+        function resetToMenu() {
+            state = 'MENU'; ui.credits.style.display = 'none'; ui.start.style.display = 'flex'; playerShip.scale.setScalar(1);
+            stopAllMusic(); playSound('menuMusic');
+        }
+
+        function onKeyDown(e) {
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = true;
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = true;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = true;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
+            if (e.code === 'Space') keys.space = true;
+            if (e.code === 'KeyC') toggleCameraMode();
+
+            if (e.code === 'Digit9') startLevel(9); 
+            if (e.code === 'Digit0') triggerEnding();
+        }
+
+        function onKeyUp(e) {
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = false;
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = false;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = false;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = false;
+            if (e.code === 'Space') keys.space = false;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(clock) { let dt = clock.getDelta(); if(dt > 0.08) dt = 0.08; update(dt); }
+            renderer.render(scene, camera);
+        }
+
+        // Initialize immediately (bypasses window.onload hanging on missing local assets)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
