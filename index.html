@@ -665,6 +665,8 @@
 
         function triggerEnding() {
             state = 'CINEMATIC';
+            ui.start.style.display = 'none';
+            ui.over.style.display = 'none';
             ui.hud.style.display = 'none';
             checkHighScore();
             ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
@@ -925,6 +927,10 @@
             if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
             if (e.code === 'Space') keys.space = true;
             if (e.code === 'KeyC') toggleCameraMode();
+
+            // Developer Shortcuts
+            if (e.code === 'Digit9') startLevel(9);   // Jump to Level 9
+            if (e.code === 'Digit0') triggerEnding(); // Jump to Ending Cinematic
         }
 
         function onKeyUp(e) {
