@@ -8,147 +8,62 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            margin: 0; padding: 0; overflow: hidden;
             background-color: #000;
             font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
-            user-select: none;
-            color: white;
+            user-select: none; color: white;
         }
 
-        #game-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-        }
+        #game-canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
 
         /* N64 Retro HUD */
         #hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            display: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10; display: none;
             text-shadow: 2px 2px 0px #000, 4px 4px 0px rgba(0,0,0,0.5);
         }
 
         .hud-top {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 30px;
-            box-sizing: border-box;
-            font-size: 16px;
-            color: #ffcc00;
+            position: absolute; top: 20px; width: 100%; display: flex;
+            justify-content: space-between; padding: 0 30px; box-sizing: border-box;
+            font-size: 16px; color: #ffcc00;
         }
-
-        .hud-top-right {
-            text-align: right;
-        }
-
-        #high-score-hud {
-            color: #00ffff;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
+        .hud-top-right { text-align: right; }
+        #high-score-hud { color: #00ffff; margin-bottom: 5px; font-size: 14px; }
+        
         .hud-bottom {
-            position: absolute;
-            bottom: 20px;
-            left: 30px;
-            font-size: 16px;
-            color: #00ff00;
-            display: flex;
-            gap: 40px;
+            position: absolute; bottom: 20px; left: 30px; font-size: 16px;
+            color: #00ff00; display: flex; gap: 40px; transition: text-shadow 0.3s;
         }
-
-        #camera-display {
-            color: #00ffff;
-        }
+        #camera-display { color: #00ffff; }
 
         #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 30px;
-            height: 30px;
-            border: 2px solid rgba(0, 255, 0, 0.4);
-            border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 30px; height: 30px; border: 2px solid rgba(0, 255, 0, 0.4); border-radius: 50%;
         }
         #crosshair::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 4px;
-            height: 4px;
-            background-color: rgba(0, 255, 0, 0.8);
-            border-radius: 50%;
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 4px; height: 4px;
+            background-color: rgba(0, 255, 0, 0.8); border-radius: 50%;
         }
 
-        /* Overlay & Branded Start UI */
+        /* Overlay & Menus */
         .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 15, 0.85);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 15, 0.85); z-index: 20; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
-
-        .logo-img {
-            max-width: 650px;
-            width: 80%;
-            height: auto;
-            margin-bottom: 5px;
-            image-rendering: pixelated;
-        }
-
+        .logo-img { max-width: 650px; width: 80%; height: auto; margin-bottom: 5px; image-rendering: pixelated; }
         .message { font-size: 18px; color: #fff; margin-bottom: 5px; line-height: 1.5; }
         .sub-message { font-size: 10px; color: #aaa; margin-top: 15px; max-width: 800px; line-height: 1.8; }
-        .brand-credit {
-            font-size: 11px;
-            color: #ff9900;
-            margin-top: 25px;
-            letter-spacing: 1.5px;
-            text-shadow: 2px 2px #000;
-        }
+        .brand-credit { font-size: 11px; color: #ff9900; margin-top: 25px; letter-spacing: 1.5px; text-shadow: 2px 2px #000; }
 
         button {
-            background-color: transparent;
-            color: #ffcc00;
-            border: 4px solid #ffcc00;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-family: inherit;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.2s;
-            box-shadow: 4px 4px 0px #000;
-            pointer-events: auto; /* Ensure buttons are clickable */
+            background-color: transparent; color: #ffcc00; border: 4px solid #ffcc00;
+            padding: 12px 24px; font-size: 14px; font-family: inherit; cursor: pointer;
+            margin-top: 15px; transition: all 0.2s; box-shadow: 4px 4px 0px #000; pointer-events: auto;
         }
-
-        button:hover {
-            background-color: #ffcc00;
-            color: #000;
-        }
+        button:hover { background-color: #ffcc00; color: #000; }
 
         #level-transition { display: none; background: transparent; pointer-events: none; }
         #level-text { font-size: 32px; color: #ff00ff; text-shadow: 4px 4px 0px #000; }
@@ -156,91 +71,25 @@
         #credits-screen { display: none; background: #000; }
         .credits-container { width: 100%; height: 100%; overflow: hidden; position: relative; }
         .credits-scroll {
-            position: absolute;
-            bottom: -280%;
-            width: 100%;
-            text-align: center;
-            animation: scrollUp 50s linear forwards;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            position: absolute; bottom: -280%; width: 100%; text-align: center;
+            animation: scrollUp 50s linear forwards; display: flex; flex-direction: column; align-items: center;
         }
         .credits-scroll h2 { color: #00ffff; margin-bottom: 30px; font-size: 20px; }
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
-        .credits-logo { max-width: 800px; margin-bottom: 20px; }
+        .credits-logo { max-width: 800px; margin-top: 50px; margin-bottom: 20px; }
 
-        /* Hall of Fame Styles */
-        .hall-of-fame {
-            margin: 40px 0;
-            padding: 20px;
-            border: 2px solid #ffcc00;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            width: 80%;
-            max-width: 400px;
-            text-shadow: 2px 2px 0px #000;
-        }
+        .hof-table { margin: 30px 0; color: #fff; font-size: 12px; width: 300px; text-align: left; }
+        .hof-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #444; padding-bottom: 5px; }
+        .hof-title { color: #ff00ff; font-size: 16px; margin-bottom: 20px; text-align: center; }
 
-        .hall-of-fame h3 { color: #ff00ff; margin-bottom: 20px; }
-        .hof-entry {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: #fff;
-        }
-        .hof-name { color: #00ffff; }
-        .hof-score { color: #ffcc00; }
-
-        /* Name Input Dialog Overlay */
-        #name-input-overlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 30;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        #name-input-overlay h2 {
-            color: #ff00ff;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 20px;
-        }
-
-        #player-name-input {
-            background: #111;
-            color: #00ffff;
-            border: 2px solid #00ffff;
-            padding: 10px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 16px;
-            text-align: center;
-            text-transform: uppercase;
-            width: 200px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        #player-name-input:focus { border-color: #ffcc00; color: #ffcc00; }
-
-        @keyframes scrollUp {
-            0% { bottom: -150%; }
-            100% { bottom: 100%; }
-        }
+        @keyframes scrollUp { 0% { bottom: -150%; } 100% { bottom: 100%; } }
     </style>
 </head>
 <body>
 
     <canvas id="game-canvas"></canvas>
 
-    <!-- UI Elements -->
+    <!-- HUD -->
     <div id="hud">
         <div class="hud-top">
             <div id="score-display">SCORE: 0</div>
@@ -260,7 +109,6 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
-        
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
         <div class="sub-message">
@@ -274,7 +122,6 @@
         <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
         <div class="logo-img" style="color: #ff0000; font-size:40px; font-weight:bold; text-shadow: 4px 4px 0px #550000; margin-top: 20px;">SHIP DESTROYED</div>
         <div class="message" id="final-score">SCORE: 0</div>
-        <div class="message" id="game-over-high-score" style="color: #00ffff; font-size: 14px; margin-bottom: 20px;">HIGH SCORE: 0</div>
         <button id="restart-btn">RETRY</button>
     </div>
 
@@ -288,16 +135,13 @@
                 <h2>MISSION ACCOMPLISHED</h2>
                 <p>EARTH IS SAVED</p>
                 <h3 id="credits-final-score" style="color: #ffcc00; margin: 20px 0;">FINAL SCORE: 0</h3>
-
-                <!-- Hall of Fame Section -->
-                <div class="hall-of-fame">
-                    <h3>HALL OF FAME</h3>
-                    <div id="hof-list">
-                        <!-- Entries will be injected here -->
-                    </div>
+                
+                <div class="hof-title">- HALL OF FAME -</div>
+                <div class="hof-table" id="hall-of-fame-list">
+                    <!-- JS Populates High Scores Here -->
                 </div>
 
-                <p><br><br></p>
+                <p><br></p>
                 <p>PRODUCED BY</p>
                 <p>Newell Web Solutions</p>
                 <p><br></p>
@@ -308,60 +152,63 @@
                 <p>Gemini & Newell Web Solutions</p>
                 <p><br></p>
                 <p>THANKS FOR PLAYING!</p>
-                <p><br></p>
-                <img src="logofull.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
+                <img class="credits-logo" src="logofull.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
             </div>
         </div>
         <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
-    </div>
-
-    <!-- Name Input Dialog -->
-    <div id="name-input-overlay" class="overlay">
-        <h2>NEW HIGH SCORE!</h2>
-        <div class="message" style="margin-bottom: 20px;">ENTER YOUR NAME:</div>
-        <input type="text" id="player-name-input" maxlength="10" placeholder="PILOT">
-        <button id="save-score-btn">SAVE SCORE</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         /**
          * ==========================================
-         * CUSTOM SPRITE CONFIGURATION
+         * CUSTOM ASSETS CONFIGURATION
          * ==========================================
          */
         const CUSTOM_SPRITES = {
-            player: 'player.png',          // Player Back (3rd Person View)
-            cockpit: 'cockpit.png',        // Cockpit view overlay
-            enemyBlueGreen: 'green.png',   // Level 1, 5 Enemy
-            enemyRed: 'red.png',           // Level 2, 6 Enemy
-            asteroid: 'asteroid.png',      // Level 2, 6 Asteroids & visual passives
-            enemyGrey: 'grey.png',         // Level 3, 7 Enemy
-            spiderRed: 'spider.png',       // Level 3, 7 Creepy spider enemy
-            ufo: 'ufo.png',                // Level 4, 8 UFO boss & L9 minions
-            mothership: 'mothership.png',  // Level 9 Mega boss
-            earth: 'earth.png',            // Final backdrop Earth
-            energy: 'energy.png'           // Health pickup
+            player: 'player.png',
+            cockpit: 'cockpit.png',
+            enemyBlueGreen: 'green.png',
+            enemyRed: 'red.png',
+            asteroid: 'asteroid.png',
+            enemyGrey: 'grey.png',
+            spiderRed: 'spider.png',
+            ufo: 'ufo.png',
+            mothership: 'mothership.png',
+            earth: 'earth.png',
+            energy: 'energy.png' // New Energy Pod Sprite
+        };
+
+        const AUDIO_FILES = {
+            shoot: 'shoot.mp3',
+            hit: 'hit.mp3',
+            heal: 'heal.mp3',
+            explode: 'explode.mp3',
+            levelUp: 'level_up.mp3',
+            menuMusic: 'menu_music.mp3',
+            endMusic: 'end_music.mp3'
         };
 
         // --- Game Constants & Variables ---
         const BOUNDS = { x: 45, y: 28 };
         const SHIP_SPEED = 45;
         const FIRE_RATE = 0.14;
-        const MAX_HIGH_SCORES = 5;
         
-        let state = 'MENU'; // MENU, PLAYING, TRANSITION, CINEMATIC, CREDITS, NAME_INPUT
+        let state = 'MENU';
         let score = 0;
-        
-        // High Score Array Setup
-        let highScores = JSON.parse(localStorage.getItem('spaceShootHighScores')) || [];
-        // Determine the current highest score to show on HUD
-        let currentHighScore = highScores.length > 0 ? highScores[0].score : 0;
-        
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
-        const KILLS_TO_ADVANCE = 15; // standard levels targets
+        const KILLS_TO_ADVANCE = 15;
+
+        // Initialize Hall of Fame High Scores
+        let highScores = JSON.parse(localStorage.getItem('spaceShootHighScores')) || [
+            { name: "NWS", score: 10000 },
+            { name: "GEM", score: 8000 },
+            { name: "FOX", score: 5000 },
+            { name: "AAA", score: 2000 },
+            { name: "ZZZ", score: 1000 }
+        ];
 
         let scene, camera, renderer, clock, textureLoader;
         let playerShip, cockpitMesh;
@@ -370,14 +217,16 @@
         const lasers = [];
         const enemies = [];
         const particles = [];
-        const pickups = [];
+        const energyPods = []; // Array for active energy drops
         
         const keys = { w: false, a: false, s: false, d: false, space: false };
         let lastFired = 0;
-        let cameraView = '3RD'; // '3RD' (Behind) or '1ST' (Cockpit View)
+        let cameraView = '3RD';
         let isScreenShaking = 0;
 
         const textures = {};
+        const sfx = {};
+        let audioInteracted = false;
 
         // DOM Elements
         const ui = {
@@ -392,19 +241,14 @@
             lvlText: document.getElementById('level-text'),
             credits: document.getElementById('credits-screen'),
             finalScore: document.getElementById('final-score'),
-            overHighScore: document.getElementById('game-over-high-score'),
             creditsFinalScore: document.getElementById('credits-final-score'),
+            hofList: document.getElementById('hall-of-fame-list'),
             camMode: document.getElementById('camera-display'),
             btnStart: document.getElementById('start-btn'),
             btnRestart: document.getElementById('restart-btn'),
-            btnCreditsRestart: document.getElementById('credits-restart-btn'),
-            nameInputOverlay: document.getElementById('name-input-overlay'),
-            nameInput: document.getElementById('player-name-input'),
-            btnSaveScore: document.getElementById('save-score-btn'),
-            hofList: document.getElementById('hof-list')
+            btnCreditsRestart: document.getElementById('credits-restart-btn')
         };
 
-        // Procedural generation as fallback 
         function generatePixelTexture(type) {
             const canvas = document.createElement('canvas');
             canvas.width = 64; canvas.height = 64;
@@ -417,26 +261,15 @@
                 ctx.fillStyle = '#0ff'; ctx.fillRect(28, 48, 8, 16); 
             } else if (type === 'cockpit') {
                 canvas.width = 512; canvas.height = 256;
-                ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4;
-                ctx.strokeRect(4, 4, 504, 248);
+                ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.strokeRect(4, 4, 504, 248);
                 ctx.fillStyle = '#111'; ctx.fillRect(0, 180, 512, 76);
                 ctx.fillStyle = '#00ff00'; ctx.fillRect(220, 190, 72, 10);
-            } else if (type === 'enemyBlueGreen') {
-                ctx.fillStyle = '#0f0'; ctx.fillRect(16, 16, 32, 32);
-                ctx.fillStyle = '#00f'; ctx.beginPath(); ctx.moveTo(32, 64); ctx.lineTo(64, 16); ctx.lineTo(0, 16); ctx.fill();
-            } else if (type === 'enemyRed') {
-                ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.moveTo(32, 64); ctx.lineTo(64, 0); ctx.lineTo(32, 16); ctx.lineTo(0, 0); ctx.fill();
+            } else if (type === 'energy') {
+                // Bright Green Cross
+                ctx.fillStyle = '#00ff00'; ctx.fillRect(24, 8, 16, 48); ctx.fillRect(8, 24, 48, 16);
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 12, 8, 40); ctx.fillRect(12, 28, 40, 8);
             } else if (type === 'asteroid') {
                 ctx.fillStyle = '#7a5a40'; ctx.beginPath(); ctx.arc(32, 32, 26, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#51321a'; ctx.beginPath(); ctx.arc(20, 20, 6, 0, Math.PI*2); ctx.arc(42, 42, 8, 0, Math.PI*2); ctx.fill();
-            } else if (type === 'enemyGrey') {
-                ctx.fillStyle = '#888'; ctx.fillRect(0, 24, 64, 16); ctx.fillRect(24, 0, 16, 64);
-            } else if (type === 'spiderRed') {
-                ctx.fillStyle = '#8b0000'; ctx.beginPath(); ctx.arc(32, 32, 12, 0, Math.PI*2); ctx.fill();
-                ctx.strokeStyle = '#f00'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.moveTo(32,32); ctx.lineTo(8,16); ctx.moveTo(32,32); ctx.lineTo(56,16);
-                ctx.moveTo(32,32); ctx.lineTo(6,32); ctx.moveTo(32,32); ctx.lineTo(58,32);
-                ctx.moveTo(32,32); ctx.lineTo(10,48); ctx.moveTo(32,32); ctx.lineTo(54,48); ctx.stroke();
             } else if (type === 'ufo') {
                 ctx.fillStyle = '#8e8e8e'; ctx.beginPath(); ctx.ellipse(32, 40, 30, 12, 0, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#ff3300'; ctx.beginPath(); ctx.arc(32, 28, 14, Math.PI, 0); ctx.fill();
@@ -445,13 +278,11 @@
                 ctx.fillStyle = '#ff6600'; ctx.fillRect(10, 30, 8, 8); ctx.fillRect(46, 30, 8, 8);
                 ctx.fillStyle = '#444'; ctx.beginPath(); ctx.moveTo(32, 64); ctx.lineTo(64, 20); ctx.lineTo(0, 20); ctx.fill();
             } else if (type === 'earth') {
-                canvas.width = 512; canvas.height = 288; // Updated fallback to 16:9
+                canvas.width = 512; canvas.height = 288;
                 ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(200, 200, 70, 0, Math.PI*2); ctx.arc(320, 260, 90, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(256, 60, 50, 0, Math.PI*2); ctx.fill();
-            } else if (type === 'energy') {
-                ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(32, 32, 22, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 14, 8, 36); ctx.fillRect(14, 28, 36, 8); // White Cross
+            } else {
+                ctx.fillStyle = '#f0f'; ctx.fillRect(16, 16, 32, 32); // generic fallback
             }
 
             return canvas.toDataURL();
@@ -460,27 +291,42 @@
         function loadTextures() {
             textureLoader = new THREE.TextureLoader();
             for (const [key, url] of Object.entries(CUSTOM_SPRITES)) {
-                // Determine source or fallbacks
-                let finalUrl;
-                if (url !== '' && !url.includes('.')) {
-                    finalUrl = generatePixelTexture(key); // custom asset check
-                } else if (url !== '') {
-                    finalUrl = url;
-                } else {
-                    finalUrl = generatePixelTexture(key);
-                }
-                
-                textures[key] = textureLoader.load(finalUrl, 
-                    undefined, 
-                    undefined, 
-                    () => {
-                        // error callback: revert to procedurals safely
-                        textures[key] = textureLoader.load(generatePixelTexture(key));
-                    }
-                );
+                let finalUrl = (url && !url.includes('.')) ? generatePixelTexture(key) : (url || generatePixelTexture(key));
+                textures[key] = textureLoader.load(finalUrl, undefined, undefined, () => {
+                    textures[key] = textureLoader.load(generatePixelTexture(key));
+                });
                 textures[key].magFilter = THREE.NearestFilter;
                 textures[key].colorSpace = THREE.SRGBColorSpace;
             }
+        }
+
+        function initAudio() {
+            for (const [key, src] of Object.entries(AUDIO_FILES)) {
+                const audio = new Audio(src);
+                if (key.toLowerCase().includes('music')) {
+                    audio.loop = true; audio.volume = 0.6;
+                } else {
+                    audio.volume = 0.4;
+                }
+                sfx[key] = audio;
+            }
+        }
+
+        function playSound(key) {
+            if (!sfx[key]) return;
+            if (!key.toLowerCase().includes('music')) {
+                const clone = sfx[key].cloneNode();
+                clone.volume = sfx[key].volume;
+                clone.play().catch(()=>{});
+            } else {
+                sfx[key].currentTime = 0;
+                sfx[key].play().catch(()=>{}); 
+            }
+        }
+
+        function stopAllMusic() {
+            if(sfx.menuMusic) sfx.menuMusic.pause();
+            if(sfx.endMusic) sfx.endMusic.pause();
         }
 
         function init() {
@@ -495,702 +341,189 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
             loadTextures();
+            initAudio();
             createEnvironment();
             createPlayer();
 
-            // Set initial high score display
-            ui.highScore.innerText = `HI-SCORE: ${currentHighScore}`;
+            ui.highScore.innerText = `HI-SCORE: ${highScores[0].score}`;
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
             
-            // Safe event listener attachment
+            // First interaction unlocks audio autoplay
+            document.body.addEventListener('click', () => {
+                if (!audioInteracted) {
+                    audioInteracted = true;
+                    if (state === 'MENU') playSound('menuMusic');
+                }
+            }, { once: true });
+
             if(ui.btnStart) ui.btnStart.addEventListener('click', () => startLevel(1));
             if(ui.btnRestart) ui.btnRestart.addEventListener('click', () => startLevel(1));
             if(ui.btnCreditsRestart) ui.btnCreditsRestart.addEventListener('click', resetToMenu);
-            if(ui.btnSaveScore) ui.btnSaveScore.addEventListener('click', saveScoreAndContinue);
 
             clock = new THREE.Clock();
             animate();
         }
 
         function createEnvironment() {
-            // Speed Stars
             const starGeo = new THREE.BufferGeometry();
-            const starCount = 2800;
-            const starPos = new Float32Array(starCount * 3);
-            for(let i=0; i < starCount * 3; i+=3) {
+            const starPos = new Float32Array(2800 * 3);
+            for(let i=0; i < 2800 * 3; i+=3) {
                 starPos[i] = (Math.random() - 0.5) * 1000;
                 starPos[i+1] = (Math.random() - 0.5) * 1000;
                 starPos[i+2] = (Math.random() - 0.5) * 1200 - 100;
             }
             starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.6 });
-            backgroundStars = new THREE.Points(starGeo, starMat);
+            backgroundStars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.6 }));
             scene.add(backgroundStars);
 
-            // Level Asteroids Space Group (Level 5-8 Field)
-            asteroidFieldGrp = new THREE.Group();
-            scene.add(asteroidFieldGrp);
-            asteroidFieldGrp.visible = false;
+            asteroidFieldGrp = new THREE.Group(); scene.add(asteroidFieldGrp); asteroidFieldGrp.visible = false;
 
-            // Earth backdrop L9
-            const earthMat = new THREE.SpriteMaterial({ 
-                map: textures.earth, 
-                color: 0xffffff,
-                fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
-            });
-            earthSprite = new THREE.Sprite(earthMat);
-            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges
+            earthSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures.earth, color: 0xffffff, fog: false }));
             earthSprite.scale.set(4000, 2250, 1);
-            // Positioned deep to stay behind stars, and shifted down to show a nice orbital curve
-            earthSprite.position.set(0, -300, -950);
+            earthSprite.position.set(0, -400, -1050);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
 
         function createPlayer() {
-            // Player Ship (3D Mesh card logic)
-            const mat = new THREE.MeshBasicMaterial({ 
-                map: textures.player, 
-                transparent: true, 
-                side: THREE.DoubleSide 
-            });
-            playerShip = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), mat);
+            playerShip = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshBasicMaterial({ map: textures.player, transparent: true, side: THREE.DoubleSide }));
             playerShip.position.set(0, -15, 15);
             scene.add(playerShip);
 
-            // Cockpit Frame Plane
-            const cockMat = new THREE.MeshBasicMaterial({
-                map: textures.cockpit,
-                transparent: true,
-                depthTest: false,
-                depthWrite: false
-            });
-            cockpitMesh = new THREE.Mesh(new THREE.PlaneGeometry(36, 18), cockMat);
-            cockpitMesh.position.set(0, 0, -10); // localized front
+            cockpitMesh = new THREE.Mesh(new THREE.PlaneGeometry(36, 18), new THREE.MeshBasicMaterial({ map: textures.cockpit, transparent: true, depthTest: false, depthWrite: false }));
+            cockpitMesh.position.set(0, 0, -10);
             cockpitMesh.visible = false;
             camera.add(cockpitMesh);
             scene.add(camera);
         }
 
         function toggleCameraMode() {
-            if (cameraView === '3RD') {
-                cameraView = '1ST';
-                cockpitMesh.visible = true;
-                playerShip.visible = false;
-                ui.camMode.innerText = "CAM: COCKPIT [C]";
-            } else {
-                cameraView = '3RD';
-                cockpitMesh.visible = false;
-                playerShip.visible = true;
-                ui.camMode.innerText = "CAM: 3RD-PERSON [C]";
-            }
+            cameraView = cameraView === '3RD' ? '1ST' : '3RD';
+            cockpitMesh.visible = cameraView === '1ST';
+            playerShip.visible = cameraView === '3RD';
+            ui.camMode.innerText = `CAM: ${cameraView}-PERSON [C]`;
             updateCameraPosition();
         }
 
         function updateCameraPosition() {
-            if (cameraView === '3RD') {
-                camera.position.set(0, 5, 45);
-            } else {
-                camera.position.set(0, 0, 18);
-            }
+            camera.position.set(0, cameraView === '3RD' ? 5 : 0, cameraView === '3RD' ? 45 : 18);
         }
 
         function spawnLaser(isEnemy, originNode, offset) {
-            const mat = new THREE.MeshBasicMaterial({ color: isEnemy ? 0xff3300 : 0x00ffcc });
-            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 3.5), mat);
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 3.5), new THREE.MeshBasicMaterial({ color: isEnemy ? 0xff3300 : 0x00ffcc }));
             mesh.position.copy(originNode.position);
-            mesh.position.x += offset.x;
-            mesh.position.y += offset.y;
-            mesh.position.z += offset.z;
-            
+            mesh.position.add(offset);
             scene.add(mesh);
-            lasers.push({ 
-                mesh, 
-                speed: isEnemy ? -90 : 165, 
-                isEnemy 
-            });
+            lasers.push({ mesh, speed: isEnemy ? -90 : 165, isEnemy });
+            if(isEnemy) playSound('shoot');
         }
 
         function spawnEnemy(type, scale, hp, behavior) {
-            const mat = new THREE.SpriteMaterial({ map: textures[type], color: 0xffffff });
-            const mesh = new THREE.Sprite(mat);
+            const mesh = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures[type], color: 0xffffff }));
             mesh.scale.set(scale, scale, 1);
-            
-            // Random outer spawns
-            mesh.position.set(
-                (Math.random() - 0.5) * BOUNDS.x * 2.2,
-                (Math.random() - 0.5) * BOUNDS.y * 1.8,
-                -420 - Math.random() * 120
-            );
-            
+            mesh.position.set((Math.random() - 0.5) * BOUNDS.x * 2.2, (Math.random() - 0.5) * BOUNDS.y * 1.8, -420 - Math.random() * 120);
             scene.add(mesh);
-            enemies.push({ 
-                mesh, 
-                hp, 
-                maxHp: hp,
-                type,
-                behavior, // straight, weave, chase, spider, boss
-                time: Math.random() * 80 
-            });
+            enemies.push({ mesh, hp, maxHp: hp, type, behavior, time: Math.random() * 80 });
         }
 
-        function spawnPickup(type, scale) {
-            const mat = new THREE.SpriteMaterial({ map: textures[type], color: 0xffffff });
-            const mesh = new THREE.Sprite(mat);
-            mesh.scale.set(scale, scale, 1);
-            
-            // Random outer spawns
-            mesh.position.set(
-                (Math.random() - 0.5) * BOUNDS.x * 1.8,
-                (Math.random() - 0.5) * BOUNDS.y * 1.8,
-                -420 - Math.random() * 120
-            );
-            
+        function spawnEnergyPod() {
+            const mesh = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures.energy, color: 0xffffff }));
+            mesh.scale.set(5, 5, 1);
+            mesh.position.set((Math.random() - 0.5) * BOUNDS.x * 1.8, (Math.random() - 0.5) * BOUNDS.y * 1.8, -500);
             scene.add(mesh);
-            pickups.push({ 
-                mesh, 
-                type,
-                speed: 65,
-                time: Math.random() * 10
-            });
+            energyPods.push({ mesh, speed: 65, time: 0 });
         }
 
         function createExplosion(pos, colorHex) {
-            const pMat = new THREE.MeshBasicMaterial({ color: colorHex });
+            playSound('explode');
             const pGeo = new THREE.PlaneGeometry(1.2, 1.2);
+            const pMat = new THREE.MeshBasicMaterial({ color: colorHex });
             for(let i=0; i<12; i++) {
-                const p = new THREE.Mesh(pGeo, pMat);
-                p.position.copy(pos);
-                scene.add(p);
-                particles.push({
-                    mesh: p,
-                    vel: new THREE.Vector3((Math.random()-0.5)*35, (Math.random()-0.5)*35, (Math.random()-0.5)*35),
-                    life: 1.0
-                });
+                const p = new THREE.Mesh(pGeo, pMat); p.position.copy(pos); scene.add(p);
+                particles.push({ mesh: p, vel: new THREE.Vector3((Math.random()-0.5)*35, (Math.random()-0.5)*35, (Math.random()-0.5)*35), life: 1.0 });
             }
         }
 
-        function isHighScore(score) {
-            // Check if score is higher than the lowest in the top 5, or if we have less than 5 scores
-            if (highScores.length < MAX_HIGH_SCORES) return true;
-            return score > highScores[highScores.length - 1].score;
-        }
-
-        function promptHighScore() {
-            state = 'NAME_INPUT';
-            ui.hud.style.display = 'none';
-            ui.over.style.display = 'none';
-            ui.start.style.display = 'none';
-            ui.credits.style.display = 'none';
-            
-            ui.nameInputOverlay.style.display = 'flex';
-            ui.nameInput.value = '';
-            ui.nameInput.focus();
-        }
-
-        function saveScoreAndContinue() {
-            let name = ui.nameInput.value.trim().toUpperCase() || 'PILOT';
-            
-            // Add and sort the array
-            highScores.push({ name: name, score: score });
-            highScores.sort((a, b) => b.score - a.score);
-            
-            // Keep only top 5
-            if (highScores.length > MAX_HIGH_SCORES) {
-                highScores = highScores.slice(0, MAX_HIGH_SCORES);
-            }
-            
-            // Save to local storage
-            localStorage.setItem('spaceShootHighScores', JSON.stringify(highScores));
-            
-            // Update HUD tracking
-            currentHighScore = highScores[0].score;
-            ui.highScore.innerText = `HI-SCORE: ${currentHighScore}`;
-            
-            ui.nameInputOverlay.style.display = 'none';
-            
-            // Proceed to appropriate screen
-            if (level === 9 && killsInLevel > 0 && enemies.length === 0) {
-                showCredits(); // From triggerEnding
-            } else {
-                showGameOver(); // From standard death
-            }
-        }
-
-        function buildHallOfFameHTML() {
-            ui.hofList.innerHTML = ''; // clear existing
-            if (highScores.length === 0) {
-                ui.hofList.innerHTML = '<div class="hof-entry"><span class="hof-name">NO SCORES YET</span></div>';
-                return;
-            }
-            
-            highScores.forEach((entry, index) => {
-                const el = document.createElement('div');
-                el.className = 'hof-entry';
-                el.innerHTML = `<span class="hof-name">${index + 1}. ${entry.name}</span><span class="hof-score">${entry.score}</span>`;
-                ui.hofList.appendChild(el);
+        function buildHallOfFame() {
+            ui.hofList.innerHTML = '';
+            highScores.forEach((hs, index) => {
+                ui.hofList.innerHTML += `<div class="hof-row"><span>${index+1}. ${hs.name}</span><span>${hs.score}</span></div>`;
             });
         }
 
-        function startLevel(lvlNum) {
-            level = lvlNum;
-            killsInLevel = 0;
-            state = 'TRANSITION';
-            ui.start.style.display = 'none';
-            ui.over.style.display = 'none';
-            ui.credits.style.display = 'none';
-            ui.hud.style.display = 'none';
-            
-            // Wipe active objects
-            lasers.forEach(l => scene.remove(l.mesh));
-            enemies.forEach(e => scene.remove(e.mesh));
-            particles.forEach(p => scene.remove(p.mesh));
-            pickups.forEach(p => scene.remove(p.mesh));
-            lasers.length = 0; enemies.length = 0; particles.length = 0; pickups.length = 0;
+        function registerHighScore() {
+            if (score > highScores[highScores.length - 1].score || highScores.length < 5) {
+                let name = prompt("NEW HIGH SCORE! Enter your initials (3 letters):", "AAA");
+                if (name) {
+                    name = name.substring(0, 3).toUpperCase();
+                    highScores.push({ name, score });
+                    highScores.sort((a, b) => b.score - a.score);
+                    highScores = highScores.slice(0, 5);
+                    localStorage.setItem('spaceShootHighScores', JSON.stringify(highScores));
+                    ui.highScore.innerText = `HI-SCORE: ${highScores[0].score}`;
+                }
+            }
+            buildHallOfFame();
+        }
 
-            // Reset
+        function startLevel(lvlNum) {
+            stopAllMusic();
+            if (lvlNum > 1) playSound('levelUp');
+            
+            level = lvlNum; killsInLevel = 0; state = 'TRANSITION';
+            ui.start.style.display = 'none'; ui.over.style.display = 'none'; ui.credits.style.display = 'none'; ui.hud.style.display = 'none';
+            
+            [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
+            lasers.length = 0; enemies.length = 0; particles.length = 0; energyPods.length = 0;
+
             playerShip.position.set(0, -35, 12);
-            if (cameraView === '3RD') playerShip.visible = true;
             if(level === 1) { score = 0; health = 100; }
             
-            // Update mode metrics
-            ui.lvl.innerText = `LEVEL: ${level}`;
-            updateHUD();
+            ui.lvl.innerText = `LEVEL: ${level}`; updateHUD();
 
-            // Environ set
             earthSprite.visible = (level === 9);
             asteroidFieldGrp.visible = (level >= 5 && level <= 8);
             if(asteroidFieldGrp.visible) populateAsteroidField();
 
-            // Display
             ui.transition.style.display = 'flex';
             ui.lvlText.innerText = level === 9 ? "FINAL MISSION" : `LEVEL ${level}`;
             
             setTimeout(() => {
-                ui.transition.style.display = 'none';
-                ui.hud.style.display = 'block';
-                state = 'PLAYING';
+                ui.transition.style.display = 'none'; ui.hud.style.display = 'block'; state = 'PLAYING';
             }, 2400);
         }
 
         function populateAsteroidField() {
-            while(asteroidFieldGrp.children.length > 0){ 
-                asteroidFieldGrp.remove(asteroidFieldGrp.children[0]); 
-            }
+            while(asteroidFieldGrp.children.length > 0){ asteroidFieldGrp.remove(asteroidFieldGrp.children[0]); }
             const mat = new THREE.SpriteMaterial({ map: textures.asteroid, color: 0x999999 });
             for(let i=0; i<50; i++) {
-                const rock = new THREE.Sprite(mat);
-                rock.scale.setScalar(Math.random()*18 + 5);
+                const rock = new THREE.Sprite(mat); rock.scale.setScalar(Math.random()*18 + 5);
                 rock.position.set((Math.random()-0.5)*260, (Math.random()-0.5)*150, -600 + Math.random()*500);
                 asteroidFieldGrp.add(rock);
             }
         }
 
         function levelDirector(dt) {
-            // Energy Pod Spawning
-            if (pickups.length < 1 && Math.random() < 0.003 && state === 'PLAYING') {
-                spawnPickup('energy', 4.5);
-            }
+            // Random Energy Drop 
+            if (Math.random() < 0.003 && state === 'PLAYING') spawnEnergyPod();
 
-            // Direct Level Spawning Matrix
+            // Enemy Spawning
             if (enemies.length < 5 + level && Math.random() < 0.032 && state === 'PLAYING') {
-                if (level === 1 || level === 5) {
-                    spawnEnemy('enemyBlueGreen', 7, 1, 'straight');
-                } 
-                else if (level === 2 || level === 6) {
-                    if (Math.random() < 0.5) {
-                        spawnEnemy('enemyRed', 7, 1, 'weave');
-                    } else {
-                        spawnEnemy('asteroid', 11, 4, 'obstacle'); // Level 2 & 6 active asteroids
-                    }
-                } 
-                else if (level === 3 || level === 7) {
-                    if (Math.random() < 0.5) {
-                        spawnEnemy('enemyGrey', 7, 2, 'straight');
-                    } else {
-                        spawnEnemy('spiderRed', 6.5, 2, 'spider'); // Level 3 & 7 Spider Host
-                    }
-                }
-                else if (level === 4 || level === 8) {
-                    if (enemies.length === 0 && killsInLevel === 0) {
-                        spawnEnemy('ufo', 26, 25, 'boss'); // Level 4 & 8 Boss UFO
-                    }
-                }
+                if (level === 1 || level === 5) spawnEnemy('enemyBlueGreen', 7, 1, 'straight');
+                else if (level === 2 || level === 6) spawnEnemy(Math.random() < 0.5 ? 'enemyRed' : 'asteroid', Math.random() < 0.5 ? 7 : 11, Math.random() < 0.5 ? 1 : 4, Math.random() < 0.5 ? 'weave' : 'obstacle');
+                else if (level === 3 || level === 7) spawnEnemy(Math.random() < 0.5 ? 'enemyGrey' : 'spiderRed', 7, 2, Math.random() < 0.5 ? 'straight' : 'spider');
+                else if (level === 4 || level === 8) { if (enemies.length === 0 && killsInLevel === 0) spawnEnemy('ufo', 26, 25, 'boss'); }
                 else if (level === 9) {
                     if (enemies.length === 0 && killsInLevel === 0) {
                         spawnEnemy('mothership', 55, 60, 'mothership_boss');
-                        spawnEnemy('ufo', 16, 12, 'boss_minion');
-                        spawnEnemy('ufo', 16, 12, 'boss_minion');
-                        spawnEnemy('ufo', 16, 12, 'boss_minion');
+                        spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion');
                     }
                 }
             }
 
-            // check standard end level metrics
-            if (level !== 4 && level !== 8 && level !== 9) {
-                if (killsInLevel >= KILLS_TO_ADVANCE) {
-                    startLevel(level + 1);
-                }
-            } else if (level === 4 || level === 8) {
-                if (enemies.length === 0 && killsInLevel > 0) startLevel(level + 1);
-            } else if (level === 9) {
-                if (enemies.length === 0 && killsInLevel > 0) triggerEnding();
-            }
-        }
-
-        function triggerEnding() {
-            if (score > 0 && isHighScore(score)) {
-                promptHighScore();
-            } else {
-                showCredits();
-            }
-        }
-        
-        function showCredits() {
-            state = 'CINEMATIC';
-            ui.start.style.display = 'none';
-            ui.over.style.display = 'none';
-            ui.hud.style.display = 'none';
-            ui.nameInputOverlay.style.display = 'none';
-            
-            buildHallOfFameHTML();
-            
-            ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
-            
-            // Reset credits animation by forcing a reflow
-            const scrollEl = document.querySelector('.credits-scroll');
-            scrollEl.style.animation = 'none';
-            scrollEl.offsetHeight; /* trigger reflow */
-            scrollEl.style.animation = null; 
-        }
-
-        function update(dt) {
-            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_INPUT') return;
-
-            // Camera Screenshake reduction
-            if (isScreenShaking > 0) {
-                isScreenShaking -= dt * 3;
-                camera.position.x += (Math.random() - 0.5) * isScreenShaking * 3.5;
-                camera.position.y += (Math.random() - 0.5) * isScreenShaking * 3.5;
-            } else {
-                updateCameraPosition();
-            }
-
-            // Starfield Forward Travel
-            const positions = backgroundStars.geometry.attributes.position.array;
-            for(let i=2; i<positions.length; i+=3) {
-                positions[i] += 230 * dt;
-                if(positions[i] > 120) positions[i] = -900;
-            }
-            backgroundStars.geometry.attributes.position.needsUpdate = true;
-
-            // Asteroid field passive movement
-            if(asteroidFieldGrp.visible) {
-                asteroidFieldGrp.children.forEach(rock => {
-                    rock.position.z += 175 * dt;
-                    if(rock.position.z > 60) {
-                        rock.position.z = -700;
-                        rock.position.x = (Math.random()-0.5)*260;
-                    }
-                });
-            }
-
-            if (state === 'TRANSITION') {
-                // Intro cinematic approach
-                playerShip.position.y += (0 - playerShip.position.y) * 2.2 * dt;
-                return;
-            }
-
-            if (state === 'CINEMATIC') {
-                // Outro planet transition Sequence
-                playerShip.position.z -= 45 * dt;
-                playerShip.position.y -= 10 * dt;
-                playerShip.scale.multiplyScalar(0.992);
-                if(playerShip.position.z < -260) {
-                    state = 'CREDITS';
-                    ui.credits.style.display = 'flex';
-                }
-                return;
-            }
-
-            levelDirector(dt);
-
-            // Player mechanics
-            let targetRotZ = 0, targetRotX = 0;
-            const flightBoundsX = cameraView === '1ST' ? BOUNDS.x * 0.9 : BOUNDS.x;
-            const flightBoundsY = cameraView === '1ST' ? BOUNDS.y * 0.9 : BOUNDS.y;
-
-            if (keys.a && playerShip.position.x > -flightBoundsX) { playerShip.position.x -= SHIP_SPEED * dt; targetRotZ = 0.35; }
-            if (keys.d && playerShip.position.x < flightBoundsX) { playerShip.position.x += SHIP_SPEED * dt; targetRotZ = -0.35; }
-            if (keys.w && playerShip.position.y < flightBoundsY) { playerShip.position.y += SHIP_SPEED * dt; targetRotX = -0.28; }
-            if (keys.s && playerShip.position.y > -flightBoundsY) { playerShip.position.y -= SHIP_SPEED * dt; targetRotX = 0.28; }
-
-            // Cockpit alignment (camera attachment sync)
-            if (cameraView === '1ST') {
-                camera.position.x = playerShip.position.x;
-                camera.position.y = playerShip.position.y;
-            } else {
-                camera.position.x += (playerShip.position.x * 0.15 - camera.position.x) * 4 * dt;
-            }
-            
-            // Banking tilt interpolation
-            playerShip.rotation.z += (targetRotZ - playerShip.rotation.z) * 9 * dt;
-            playerShip.rotation.x += (targetRotX - playerShip.rotation.x) * 9 * dt;
-
-            // Attack Lasers Spawning
-            if (keys.space && clock.getElapsedTime() - lastFired > FIRE_RATE) {
-                spawnLaser(false, playerShip, {x: -2.8, y: -0.5, z: -2});
-                spawnLaser(false, playerShip, {x: 2.8, y: -0.5, z: -2});
-                lastFired = clock.getElapsedTime();
-            }
-
-            // Lasers cycle
-            for (let i = lasers.length - 1; i >= 0; i--) {
-                const l = lasers[i];
-                l.mesh.position.z -= l.speed * dt;
-                
-                // Crash hit checks
-                if (l.isEnemy && l.mesh.position.distanceTo(playerShip.position) < 3.8) {
-                    takeDamage(10);
-                    scene.remove(l.mesh);
-                    lasers.splice(i, 1);
-                    continue;
-                }
-
-                // Range clean
-                if (l.mesh.position.z < -650 || l.mesh.position.z > 80) {
-                    scene.remove(l.mesh);
-                    lasers.splice(i, 1);
-                }
-            }
-
-            // NPC cycle 
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const e = enemies[i];
-                e.time += dt;
-
-                // Move matrices patterns
-                if (e.behavior === 'straight' || e.behavior === 'obstacle') {
-                    e.mesh.position.z += (e.behavior === 'obstacle' ? 70 : 62) * dt;
-                } 
-                else if (e.behavior === 'weave') {
-                    e.mesh.position.z += 55 * dt;
-                    e.mesh.position.x += Math.sin(e.time * 2.8) * 32 * dt;
-                } 
-                else if (e.behavior === 'spider') {
-                    // level spider crawling
-                    e.mesh.position.z += 60 * dt;
-                    e.mesh.position.y += Math.cos(e.time * 3.5) * 14 * dt;
-                    e.mesh.position.x += Math.sin(e.time * 1.5) * 20 * dt;
-                }
-                else if (e.behavior === 'chase') {
-                    e.mesh.position.z += 72 * dt;
-                    const dX = playerShip.position.x - e.mesh.position.x;
-                    e.mesh.position.x += Math.sign(dX) * 22 * dt;
-                } 
-                else if (e.behavior.includes('boss')) {
-                    // Hover and orbit
-                    e.mesh.position.z += (-160 - e.mesh.position.z) * 2.5 * dt;
-                    e.mesh.position.x = Math.sin(e.time * 0.8) * 32;
-                    
-                    if (e.behavior === 'mothership_boss') {
-                        e.mesh.position.y = Math.cos(e.time * 0.5) * 12;
-                    } else if (e.behavior === 'boss_minion') {
-                        e.mesh.position.x += Math.cos(e.time * 2) * 16;
-                        e.mesh.position.y = Math.sin(e.time * 3) * 12;
-                    }
-                }
-
-                // Generic Enemy Firing Routine (All non-asteroids can shoot)
-                if (e.behavior !== 'obstacle') {
-                     // Determine fire rate based on behavior. Bosses shoot more often.
-                     const fireChance = e.behavior.includes('boss') ? (e.behavior === 'mothership_boss' ? 0.045 : 0.022) : 0.005;
-                     
-                     if (Math.random() < fireChance) {
-                         // Shoot from enemy position towards player direction (simplified as straight down z)
-                         spawnLaser(true, e.mesh, {
-                             x: (Math.random()-0.5) * (e.behavior.includes('boss') ? 15 : 2), 
-                             y: e.behavior === 'mothership_boss' ? -4 : 0, 
-                             z: 6
-                         });
-                     }
-                }
-
-                // Crash metrics (Asteroid triggers instant high drop)
-                if (e.mesh.position.distanceTo(playerShip.position) < (e.behavior.includes('boss') ? 22 : 4.5)) {
-                    takeDamage(e.behavior === 'obstacle' ? 25 : 15);
-                    createExplosion(e.mesh.position, 0xffaa00);
-                    if (!e.behavior.includes('boss')) {
-                        scene.remove(e.mesh);
-                        enemies.splice(i, 1);
-                    }
-                    continue;
-                }
-
-                // Weapons Hit cycle
-                let isDead = false;
-                for (let j = lasers.length - 1; j >= 0; j--) {
-                    const l = lasers[j];
-                    if (!l.isEnemy && l.mesh.position.distanceTo(e.mesh.position) < (e.behavior.includes('boss') ? 16 : 4.5)) {
-                        createExplosion(l.mesh.position, 0xffbb00);
-                        scene.remove(l.mesh);
-                        lasers.splice(j, 1);
-                        
-                        e.hp--;
-                        // Flash impact code
-                        e.mesh.material.color.setHex(0xff3333);
-                        setTimeout(() => { if(e && e.mesh) e.mesh.material.color.setHex(0xffffff); }, 80);
-
-                        if (e.hp <= 0) {
-                            createExplosion(e.mesh.position, 0x00ffff);
-                            createExplosion(e.mesh.position, 0xff00ff);
-                            scene.remove(e.mesh);
-                            enemies.splice(i, 1);
-                            score += e.maxHp * 100;
-                            killsInLevel++;
-                            updateHUD();
-                            isDead = true;
-                        }
-                        break;
-                    }
-                }
-
-                if (!isDead && e.mesh.position.z > 60) {
-                    scene.remove(e.mesh);
-                    enemies.splice(i, 1);
-                }
-            }
-
-            // Particle Updates
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.mesh.position.addScaledVector(p.vel, dt);
-                p.life -= dt * 2.8;
-                p.mesh.scale.setScalar(p.life);
-                if (p.life <= 0) {
-                    scene.remove(p.mesh);
-                    particles.splice(i, 1);
-                }
-            }
-
-            // Pickups cycle 
-            for (let i = pickups.length - 1; i >= 0; i--) {
-                const p = pickups[i];
-                p.time += dt;
-                p.mesh.position.z += p.speed * dt;
-                p.mesh.position.y += Math.sin(p.time * 4) * 5 * dt; // Gentle bobbing motion
-
-                // Collision with player
-                if (p.mesh.position.distanceTo(playerShip.position) < 5.5) {
-                    health = Math.min(100, health + 20); // Add 20% health, cap at 100
-                    ui.health.style.color = '#00ff00';
-                    setTimeout(() => ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00', 300);
-                    updateHUD();
-                    
-                    createExplosion(p.mesh.position, 0x00ff00); // Green heal sparkle
-                    scene.remove(p.mesh);
-                    pickups.splice(i, 1);
-                    continue;
-                }
-
-                if (p.mesh.position.z > 60) {
-                    scene.remove(p.mesh);
-                    pickups.splice(i, 1);
-                }
-            }
-        }
-
-        function takeDamage(amt) {
-            health -= amt;
-            isScreenShaking = 0.8; // Cockpit impact effect
-            ui.health.style.color = '#ff0000';
-            setTimeout(() => ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00', 250);
-            updateHUD();
-            if(health <= 0) gameOver();
-        }
-
-        function updateHUD() {
-            ui.score.innerText = `SCORE: ${score}`;
-            ui.health.innerText = `HEALTH: ${Math.max(0, health)}%`;
-            ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00';
-            
-            // Live high score update check
-            if (score > currentHighScore) {
-                ui.highScore.style.color = '#ff00ff';
-                ui.highScore.innerText = `HI-SCORE: ${score}`;
-            }
-        }
-
-        function gameOver() {
-            createExplosion(playerShip.position, 0xff0000);
-            playerShip.position.set(0, -100, 0); 
-            
-            if (score > 0 && isHighScore(score)) {
-                promptHighScore();
-            } else {
-                showGameOver();
-            }
-        }
-
-        function showGameOver() {
-            state = 'MENU';
-            ui.hud.style.display = 'none';
-            ui.nameInputOverlay.style.display = 'none';
-            ui.over.style.display = 'flex';
-            
-            ui.finalScore.innerText = `SCORE: ${score}`;
-            ui.overHighScore.innerText = `HIGH SCORE: ${currentHighScore}`;
-        }
-
-        function resetToMenu() {
-            state = 'MENU';
-            ui.credits.style.display = 'none';
-            ui.start.style.display = 'flex';
-            playerShip.scale.setScalar(1);
-        }
-
-        function onKeyDown(e) {
-            if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = true;
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = true;
-            if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = true;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
-            if (e.code === 'Space') keys.space = true;
-            if (e.code === 'KeyC') toggleCameraMode();
-
-            // Developer Shortcuts
-            if (e.code === 'Digit9') startLevel(9);   // Jump to Level 9
-            if (e.code === 'Digit0') triggerEnding(); // Jump to Ending Cinematic
-        }
-
-        function onKeyUp(e) {
-            if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = false;
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = false;
-            if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = false;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = false;
-            if (e.code === 'Space') keys.space = false;
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if(clock) {
-                let dt = clock.getDelta();
-                if(dt > 0.08) dt = 0.08; 
-                update(dt);
-            }
-            renderer.render(scene, camera);
-        }
-
-        // Initialize on load
-        window.onload = init;
-    </script>
-</body>
-</html>
+            if (level !== 4 && level !== 8 && level !== 9) { if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(level + 1); } 
+            else if (level === 4 || level === 8) { if (enemies.length === 0 && killsInLevel > 0) startLevel(level + 1); } 
+            else if (level === 9) { if (enemies.length === 0 && killsIn
