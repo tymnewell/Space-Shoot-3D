@@ -197,6 +197,7 @@
             ufo: 'ufo.png',
             mothership: 'mothership.png',
             earth: 'earth.png',
+            moon: 'moon.png', // Moon background
             energy: 'energy.png' 
         };
 
@@ -244,7 +245,7 @@
 
         let scene, camera, renderer, clock, textureLoader;
         let playerShip, cockpitMesh;
-        let backgroundStars, asteroidFieldGrp, earthSprite;
+        let backgroundStars, asteroidFieldGrp, earthSprite, moonSprite;
         
         const lasers = []; const enemies = []; const particles = []; const energyPods = []; 
         
@@ -305,6 +306,13 @@
                 canvas.width = 512; canvas.height = 288;
                 ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(200, 200, 70, 0, Math.PI*2); ctx.arc(320, 260, 90, 0, Math.PI*2); ctx.fill();
+            } else if (type === 'moon') {
+                canvas.width = 512; canvas.height = 288;
+                ctx.fillStyle = '#444444'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#222222'; 
+                ctx.beginPath(); ctx.arc(180, 180, 50, 0, Math.PI*2); ctx.arc(340, 240, 70, 0, Math.PI*2); ctx.arc(220, 360, 45, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#555555'; 
+                ctx.beginPath(); ctx.arc(170, 170, 15, 0, Math.PI*2); ctx.arc(325, 230, 20, 0, Math.PI*2); ctx.fill();
             } else { ctx.fillStyle = '#f0f'; ctx.fillRect(16, 16, 32, 32); }
             return canvas.toDataURL();
         }
@@ -359,11 +367,9 @@
             }
         }
 
-
         function initAudio() {
             for (const [key, src] of Object.entries(AUDIO_FILES)) {
                 const audio = new Audio(src);
-                // Only loop tracks that have 'music' in their key name
                 if (key.toLowerCase().includes('music')) {
                     audio.loop = true; 
                     audio.volume = 0.6;
@@ -421,6 +427,10 @@
             earthSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures.earth, color: 0xffffff, fog: false }));
             earthSprite.scale.set(4000, 2250, 1); earthSprite.position.set(0, -400, -1050);
             scene.add(earthSprite); earthSprite.visible = false;
+
+            moonSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: textures.moon, color: 0xffffff, fog: false }));
+            moonSprite.scale.set(4000, 2250, 1); moonSprite.position.set(0, -400, -1050);
+            scene.add(moonSprite); moonSprite.visible = false;
         }
 
         function createPlayer() {
@@ -531,9 +541,16 @@
 
             playerShip.position.set(0, -35, 12); if(level === 1) { score = 0; health = 100; }
             ui.lvl.innerText = `LEVEL: ${level}`; updateHUD();
-            earthSprite.visible = (level === 9); asteroidFieldGrp.visible = (level >= 5 && level <= 8); if(asteroidFieldGrp.visible) populateAsteroidField();
+            
+            earthSprite.visible = (level === 10);
+            moonSprite.visible = (level === 9);
+            asteroidFieldGrp.visible = (level >= 5 && level <= 8); if(asteroidFieldGrp.visible) populateAsteroidField();
 
-            ui.transition.style.display = 'flex'; ui.lvlText.innerText = level === 9 ? "FINAL MISSION" : `LEVEL ${level}`;
+            ui.transition.style.display = 'flex'; 
+            if (level === 10) ui.lvlText.innerText = "FINAL MISSION";
+            else if (level === 9) ui.lvlText.innerText = "LUNAR SIEGE";
+            else ui.lvlText.innerText = `LEVEL ${level}`;
+            
             setTimeout(() => { ui.transition.style.display = 'none'; ui.hud.style.display = 'block'; state = 'PLAYING'; }, 2400);
         }
 
@@ -555,6 +572,12 @@
                 else if (level === 3 || level === 7) spawnEnemy(Math.random() < 0.5 ? 'enemyGrey' : 'spiderRed', 7, 2, Math.random() < 0.5 ? 'straight' : 'spider');
                 else if (level === 4 || level === 8) { if (enemies.length === 0 && killsInLevel === 0) spawnEnemy('ufo', 26, 25, 'boss'); }
                 else if (level === 9) {
+                    // Level 9: Moon Battle with UFOs and Red Ships
+                    if (Math.random() < 0.5) spawnEnemy('ufo', 10, 2, 'weave');
+                    else spawnEnemy('enemyRed', 7, 2, 'chase');
+                }
+                else if (level === 10) {
+                    // Level 10: Earth Mothership final encounter
                     if (enemies.length === 0 && killsInLevel === 0) {
                         spawnEnemy('mothership', 55, 60, 'mothership_boss');
                         spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion');
@@ -562,9 +585,9 @@
                 }
             }
 
-            if (level !== 4 && level !== 8 && level !== 9) { if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(level + 1); } 
-            else if (level === 4 || level === 8) { if (enemies.length === 0 && killsInLevel > 0) startLevel(level + 1); } 
-            else if (level === 9) { if (enemies.length === 0 && killsInLevel > 0) triggerEnding(); }
+            if (level !== 4 && level !== 8 && level !== 9 && level !== 10) { if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(level + 1); } 
+            else if (level === 4 || level === 8 || level === 9) { if (enemies.length === 0 && (killsInLevel > 0 || (level === 9 && killsInLevel >= KILLS_TO_ADVANCE))) startLevel(level + 1); } 
+            else if (level === 10) { if (enemies.length === 0 && killsInLevel > 0) triggerEnding(); }
         }
 
         function triggerEnding() {
@@ -718,7 +741,8 @@
             if (e.code === 'Space') keys.space = true;
             if (e.code === 'KeyC') toggleCameraMode();
 
-            if (e.code === 'Digit9') startLevel(9); 
+            if (e.code === 'Digit9') startLevel(9); // Cheat: skip to Moon Siege
+            if (e.code === 'Digit8') startLevel(10); // Cheat: skip to Boss Level
             if (e.code === 'Digit0') triggerEnding();
         }
 
