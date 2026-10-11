@@ -245,7 +245,7 @@
 <p><br></p>
 <p><br></p>
 <p><br></p>
-                <img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
+                <img src="logofull.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
             </div>
         </div>
         <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
@@ -455,10 +455,10 @@
                 fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
             });
             earthSprite = new THREE.Sprite(earthMat);
-            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges
+            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges changed to -200
             earthSprite.scale.set(4000, 2250, 1);
             // Positioned deep to stay behind stars, and shifted down to show a nice orbital curve
-            earthSprite.position.set(0, -300, -950);
+            earthSprite.position.set(0, -200, -950);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
