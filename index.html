@@ -340,7 +340,8 @@
             spiderRed: 'spider.png',       // Level 3, 7 Creepy spider enemy
             ufo: 'ufo.png',                // Level 4, 8 UFO boss & L9 minions
             mothership: 'mothership.png',  // Level 9 Mega boss
-            earth: 'earth.png'             // Final backdrop Earth
+            earth: 'earth.png',            // Final backdrop Earth
+            energy: 'energy.png'           // Health pickup
         };
 
         // --- Game Constants & Variables ---
@@ -369,6 +370,7 @@
         const lasers = [];
         const enemies = [];
         const particles = [];
+        const pickups = [];
         
         const keys = { w: false, a: false, s: false, d: false, space: false };
         let lastFired = 0;
@@ -447,6 +449,9 @@
                 ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(200, 200, 70, 0, Math.PI*2); ctx.arc(320, 260, 90, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(256, 60, 50, 0, Math.PI*2); ctx.fill();
+            } else if (type === 'energy') {
+                ctx.fillStyle = '#00ff00'; ctx.beginPath(); ctx.arc(32, 32, 22, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 14, 8, 36); ctx.fillRect(14, 28, 36, 8); // White Cross
             }
 
             return canvas.toDataURL();
@@ -632,6 +637,27 @@
             });
         }
 
+        function spawnPickup(type, scale) {
+            const mat = new THREE.SpriteMaterial({ map: textures[type], color: 0xffffff });
+            const mesh = new THREE.Sprite(mat);
+            mesh.scale.set(scale, scale, 1);
+            
+            // Random outer spawns
+            mesh.position.set(
+                (Math.random() - 0.5) * BOUNDS.x * 1.8,
+                (Math.random() - 0.5) * BOUNDS.y * 1.8,
+                -420 - Math.random() * 120
+            );
+            
+            scene.add(mesh);
+            pickups.push({ 
+                mesh, 
+                type,
+                speed: 65,
+                time: Math.random() * 10
+            });
+        }
+
         function createExplosion(pos, colorHex) {
             const pMat = new THREE.MeshBasicMaterial({ color: colorHex });
             const pGeo = new THREE.PlaneGeometry(1.2, 1.2);
@@ -722,7 +748,8 @@
             lasers.forEach(l => scene.remove(l.mesh));
             enemies.forEach(e => scene.remove(e.mesh));
             particles.forEach(p => scene.remove(p.mesh));
-            lasers.length = 0; enemies.length = 0; particles.length = 0;
+            pickups.forEach(p => scene.remove(p.mesh));
+            lasers.length = 0; enemies.length = 0; particles.length = 0; pickups.length = 0;
 
             // Reset
             playerShip.position.set(0, -35, 12);
@@ -763,6 +790,11 @@
         }
 
         function levelDirector(dt) {
+            // Energy Pod Spawning
+            if (pickups.length < 1 && Math.random() < 0.003 && state === 'PLAYING') {
+                spawnPickup('energy', 4.5);
+            }
+
             // Direct Level Spawning Matrix
             if (enemies.length < 5 + level && Math.random() < 0.032 && state === 'PLAYING') {
                 if (level === 1 || level === 5) {
@@ -1041,6 +1073,32 @@
                 if (p.life <= 0) {
                     scene.remove(p.mesh);
                     particles.splice(i, 1);
+                }
+            }
+
+            // Pickups cycle 
+            for (let i = pickups.length - 1; i >= 0; i--) {
+                const p = pickups[i];
+                p.time += dt;
+                p.mesh.position.z += p.speed * dt;
+                p.mesh.position.y += Math.sin(p.time * 4) * 5 * dt; // Gentle bobbing motion
+
+                // Collision with player
+                if (p.mesh.position.distanceTo(playerShip.position) < 5.5) {
+                    health = Math.min(100, health + 20); // Add 20% health, cap at 100
+                    ui.health.style.color = '#00ff00';
+                    setTimeout(() => ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00', 300);
+                    updateHUD();
+                    
+                    createExplosion(p.mesh.position, 0x00ff00); // Green heal sparkle
+                    scene.remove(p.mesh);
+                    pickups.splice(i, 1);
+                    continue;
+                }
+
+                if (p.mesh.position.z > 60) {
+                    scene.remove(p.mesh);
+                    pickups.splice(i, 1);
                 }
             }
         }
