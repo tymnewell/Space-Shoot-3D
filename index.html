@@ -160,14 +160,14 @@
             bottom: -180%;
             width: 100%;
             text-align: center;
-            animation: scrollUp 60s linear forwards;
+            animation: scrollUp 20s linear forwards;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .credits-scroll h2 { color: #00ffff; margin-bottom: 30px; font-size: 20px; }
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
-        .credits-logo {max-width: 800px; margin-bottom: 40px;}
+        .credits-logo { max-width: 800px; margin-bottom: 20px; }
 
         @keyframes scrollUp {
             0% { bottom: -110%; }
@@ -233,13 +233,19 @@
                 <p>PRODUCED BY</p>
                 <p>Newell Web Solutions</p>
                 <p><br></p>
-                <p>LEVEL DESIGN & ART</p>
-                <p>Gemini AI & Newell Web Solutions</p>
+                <p>PROGRAMMING</p>
+                <p>Gemini & Newell Web Solutions</p>
                 <p><br></p>
+                <p>LEVEL DESIGN & ART</p>
+                <p>Gemini Image Generator</p>
                 <p><br></p>
                 <p>THANKS FOR PLAYING!</p>
                 <p>SPACE SHOOT 3D</p>
-                <p><img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';"></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+                <img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
             </div>
         </div>
         <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
@@ -449,9 +455,10 @@
                 fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
             });
             earthSprite = new THREE.Sprite(earthMat);
-            // Updated scale to a massive 16:9 cinematic background
-            earthSprite.scale.set(1600, 900, 1);
-            earthSprite.position.set(0, -100, -900);
+            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges
+            earthSprite.scale.set(4000, 2250, 1);
+            // Positioned deep to stay behind stars, and shifted down to show a nice orbital curve
+            earthSprite.position.set(0, -300, -950);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
