@@ -71,7 +71,7 @@
         .initial-selected { border-bottom-color: #ffcc00; color: #ffcc00; animation: blink 1s infinite; }
 
         #level-transition { display: none; background: transparent; pointer-events: none; }
-        #level-text { font-size: 32px; color: #ff00ff; text-shadow: 4px 4px 0px #000; }
+        #level-text { font-size: 32px; color: #ff00ff; text-shadow: 4px 4px 0px #000; transition: all 0.3s ease;}
 
         #credits-screen { display: none; background: #000; }
         .credits-container { width: 100%; height: 100%; overflow: hidden; position: relative; }
@@ -212,12 +212,15 @@
         const SHIP_SPEED = 45;
         const FIRE_RATE = 0.14;
         
-        let state = 'MENU';
+        let state = 'MENU'; // MENU, PLAYING, TRANSITION, INTRO_CINEMATIC, CINEMATIC, CREDITS, NAME_ENTRY
         let score = 0;
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
         const KILLS_TO_ADVANCE = 15;
+
+        // Cinematic variables
+        let introTimer = 0;
 
         // Joystick High Score Entry Variables
         let initials = [0, 0, 0]; // A=0, Z=25
@@ -543,26 +546,51 @@
         }
 
         function startLevel(lvlNum) {
-            stopAllMusic(); if (lvlNum > 1 && audioInteracted) playMusic('levelUp');
-            level = lvlNum; killsInLevel = 0; state = 'TRANSITION';
+            stopAllMusic(); 
+            level = lvlNum; killsInLevel = 0; 
             ui.start.style.display = 'none'; ui.over.style.display = 'none'; ui.credits.style.display = 'none'; ui.hud.style.display = 'none';
             
             [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
             lasers.length = 0; enemies.length = 0; particles.length = 0; energyPods.length = 0;
 
-            playerShip.position.set(0, -35, 12); if(level === 1) { score = 0; health = 100; }
+            if(level === 1) { score = 0; health = 100; }
             ui.lvl.innerText = `LEVEL: ${level}`; updateHUD();
             
             earthSprite.visible = (level === 10);
             moonSprite.visible = (level === 9);
             asteroidFieldGrp.visible = (level >= 5 && level <= 8); if(asteroidFieldGrp.visible) populateAsteroidField();
 
-            ui.transition.style.display = 'flex'; 
-            if (level === 10) ui.lvlText.innerText = "FINAL MISSION";
-            else if (level === 9) ui.lvlText.innerText = "LUNAR SIEGE";
-            else ui.lvlText.innerText = `LEVEL ${level}`;
-            
-            setTimeout(() => { ui.transition.style.display = 'none'; ui.hud.style.display = 'block'; state = 'PLAYING'; }, 2400);
+            // Intro cinematic logic for Level 1
+            if (level === 1) {
+                state = 'INTRO_CINEMATIC';
+                introTimer = 0;
+                playerShip.position.set(0, 15, 100); // Start far back
+                playerShip.rotation.set(0, 0, 0);
+
+                ui.transition.style.display = 'flex'; 
+                ui.lvlText.innerText = "PREPARE FOR LAUNCH";
+                
+                setTimeout(() => { ui.lvlText.style.color = '#00ff00'; ui.lvlText.innerText = "ENGAGE!"; }, 4500);
+
+                setTimeout(() => { 
+                    ui.transition.style.display = 'none'; 
+                    ui.hud.style.display = 'block'; 
+                    state = 'PLAYING'; 
+                    ui.lvlText.style.color = '#ff00ff'; // Reset color
+                    if(audioInteracted) playMusic('levelUp');
+                }, 8000);
+            } else {
+                state = 'TRANSITION';
+                playerShip.position.set(0, -35, 12);
+                if (lvlNum > 1 && audioInteracted) playMusic('levelUp');
+                
+                ui.transition.style.display = 'flex'; 
+                if (level === 10) ui.lvlText.innerText = "FINAL MISSION";
+                else if (level === 9) ui.lvlText.innerText = "LUNAR SIEGE";
+                else ui.lvlText.innerText = `LEVEL ${level}`;
+                
+                setTimeout(() => { ui.transition.style.display = 'none'; ui.hud.style.display = 'block'; state = 'PLAYING'; }, 2400);
+            }
         }
 
         function populateAsteroidField() {
@@ -587,9 +615,13 @@
                     else spawnEnemy('enemyRed', 7, 2, 'chase');
                 }
                 else if (level === 10) {
+                    // Level 10: Intense Mothership Battle
                     if (enemies.length === 0 && killsInLevel === 0) {
-                        spawnEnemy('mothership', 55, 60, 'mothership_boss');
-                        spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion'); spawnEnemy('ufo', 16, 12, 'boss_minion');
+                        spawnEnemy('mothership', 65, 120, 'mothership_boss'); // Huge health boost!
+                        for(let i=0; i<6; i++) spawnEnemy('ufo', 16, 12, 'boss_minion');
+                    } else if (enemies.some(e => e.behavior === 'mothership_boss') && enemies.length < 15 && Math.random() < 0.08) {
+                        // The mothership continuously spawns reinforcements!
+                        spawnEnemy(Math.random() < 0.6 ? 'ufo' : 'enemyRed', 16, 10, 'boss_minion');
                     }
                 }
             }
@@ -605,7 +637,8 @@
                 if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(10); 
             } 
             else if (level === 10) { 
-                if (enemies.length === 0 && killsInLevel > 0) triggerEnding(); 
+                // Ensure the mothership has been defeated before ending
+                if (killsInLevel > 0 && !enemies.some(e => e.behavior === 'mothership_boss')) triggerEnding(); 
             }
         }
 
@@ -624,12 +657,41 @@
                 camera.position.x += (Math.random() - 0.5) * isScreenShaking * 3.5; camera.position.y += (Math.random() - 0.5) * isScreenShaking * 3.5;
             } else { updateCameraPosition(); }
 
+            // Dynamic Star Speed based on Cinematic State
+            let starSpeed = 230;
+            if (state === 'INTRO_CINEMATIC') {
+                introTimer += dt;
+                // Starts hyper-fast and slows down over 6 seconds
+                starSpeed = introTimer < 6 ? 2000 - (introTimer * 300) : 230;
+            }
+
             const positions = backgroundStars.geometry.attributes.position.array;
-            for(let i=2; i<positions.length; i+=3) { positions[i] += 230 * dt; if(positions[i] > 120) positions[i] = -900; }
+            for(let i=2; i<positions.length; i+=3) { positions[i] += starSpeed * dt; if(positions[i] > 120) positions[i] = -900; }
             backgroundStars.geometry.attributes.position.needsUpdate = true;
 
             if(asteroidFieldGrp.visible) {
                 asteroidFieldGrp.children.forEach(rock => { rock.position.z += 175 * dt; if(rock.position.z > 60) { rock.position.z = -700; rock.position.x = (Math.random()-0.5)*260; } });
+            }
+
+            if (state === 'INTRO_CINEMATIC') {
+                // Fly-in Sequence
+                if (introTimer < 3) {
+                    playerShip.position.z += (10 - playerShip.position.z) * 2 * dt;
+                    playerShip.rotation.z = introTimer * Math.PI * 2; // Barrel Roll
+                } else if (introTimer < 6) {
+                    playerShip.position.z += (15 - playerShip.position.z) * 3 * dt;
+                    playerShip.position.y += (Math.sin(introTimer * 4) * 8 - playerShip.position.y) * 2 * dt;
+                    playerShip.position.x += (Math.cos(introTimer * 3) * 10 - playerShip.position.x) * 2 * dt;
+                    playerShip.rotation.z = Math.cos(introTimer * 3) * 0.4; // Strafe tilt
+                } else {
+                    // Lock into start position
+                    playerShip.position.z += (15 - playerShip.position.z) * 4 * dt;
+                    playerShip.position.y += (-15 - playerShip.position.y) * 4 * dt;
+                    playerShip.position.x += (0 - playerShip.position.x) * 4 * dt;
+                    playerShip.rotation.z += (0 - playerShip.rotation.z) * 5 * dt;
+                }
+                updateCameraPosition();
+                return;
             }
 
             if (state === 'TRANSITION') { playerShip.position.y += (0 - playerShip.position.y) * 2.2 * dt; return; }
