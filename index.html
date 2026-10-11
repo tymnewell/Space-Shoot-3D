@@ -81,7 +81,7 @@
         }
         .credits-scroll h2 { color: #00ffff; margin-bottom: 30px; font-size: 20px; }
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
-        .credits-logo { max-width: 800px; margin-top: 50px; margin-bottom: 20px; }
+        .credits-logo { max-width: 1400px; margin-top: 50px; margin-bottom: 20px; }
 
         .hof-table { margin: 30px 0; color: #fff; font-size: 14px; width: 300px; text-align: left; background: rgba(0,0,0,0.5); padding: 20px; border: 2px solid #333; }
         .hof-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 5px; }
@@ -359,10 +359,18 @@
             }
         }
 
+
         function initAudio() {
             for (const [key, src] of Object.entries(AUDIO_FILES)) {
                 const audio = new Audio(src);
-                audio.loop = true; audio.volume = 0.6;
+                // Only loop tracks that have 'music' in their key name
+                if (key.toLowerCase().includes('music')) {
+                    audio.loop = true; 
+                    audio.volume = 0.6;
+                } else {
+                    audio.loop = false; 
+                    audio.volume = 0.6;
+                }
                 sfx[key] = audio;
             }
         }
