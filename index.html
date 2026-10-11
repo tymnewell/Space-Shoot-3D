@@ -169,6 +169,67 @@
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
         .credits-logo { max-width: 800px; margin-bottom: 20px; }
 
+        /* Hall of Fame Styles */
+        .hall-of-fame {
+            margin: 40px 0;
+            padding: 20px;
+            border: 2px solid #ffcc00;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            width: 80%;
+            max-width: 400px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .hall-of-fame h3 { color: #ff00ff; margin-bottom: 20px; }
+        .hof-entry {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #fff;
+        }
+        .hof-name { color: #00ffff; }
+        .hof-score { color: #ffcc00; }
+
+        /* Name Input Dialog Overlay */
+        #name-input-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 30;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #name-input-overlay h2 {
+            color: #ff00ff;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 20px;
+        }
+
+        #player-name-input {
+            background: #111;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            padding: 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 16px;
+            text-align: center;
+            text-transform: uppercase;
+            width: 200px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        #player-name-input:focus { border-color: #ffcc00; color: #ffcc00; }
+
         @keyframes scrollUp {
             0% { bottom: -150%; }
             100% { bottom: 100%; }
@@ -227,7 +288,15 @@
                 <h2>MISSION ACCOMPLISHED</h2>
                 <p>EARTH IS SAVED</p>
                 <h3 id="credits-final-score" style="color: #ffcc00; margin: 20px 0;">FINAL SCORE: 0</h3>
-                <h3 id="credits-high-score" style="color: #00ffff; margin-bottom: 40px; font-size: 14px;">HIGH SCORE: 0</h3>
+
+                <!-- Hall of Fame Section -->
+                <div class="hall-of-fame">
+                    <h3>HALL OF FAME</h3>
+                    <div id="hof-list">
+                        <!-- Entries will be injected here -->
+                    </div>
+                </div>
+
                 <p><br><br></p>
                 <p>PRODUCED BY</p>
                 <p>Newell Web Solutions</p>
@@ -239,11 +308,19 @@
                 <p>Gemini & Newell Web Solutions</p>
                 <p><br></p>
                 <p>THANKS FOR PLAYING!</p>
-<p><br></p>
+                <p><br></p>
                 <img src="logofull.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
             </div>
         </div>
         <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
+    </div>
+
+    <!-- Name Input Dialog -->
+    <div id="name-input-overlay" class="overlay">
+        <h2>NEW HIGH SCORE!</h2>
+        <div class="message" style="margin-bottom: 20px;">ENTER YOUR NAME:</div>
+        <input type="text" id="player-name-input" maxlength="10" placeholder="PILOT">
+        <button id="save-score-btn">SAVE SCORE</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -270,10 +347,16 @@
         const BOUNDS = { x: 45, y: 28 };
         const SHIP_SPEED = 45;
         const FIRE_RATE = 0.14;
+        const MAX_HIGH_SCORES = 5;
         
-        let state = 'MENU'; // MENU, PLAYING, TRANSITION, CINEMATIC, CREDITS
+        let state = 'MENU'; // MENU, PLAYING, TRANSITION, CINEMATIC, CREDITS, NAME_INPUT
         let score = 0;
-        let highScore = localStorage.getItem('spaceShootHighScore') || 0;
+        
+        // High Score Array Setup
+        let highScores = JSON.parse(localStorage.getItem('spaceShootHighScores')) || [];
+        // Determine the current highest score to show on HUD
+        let currentHighScore = highScores.length > 0 ? highScores[0].score : 0;
+        
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
@@ -309,11 +392,14 @@
             finalScore: document.getElementById('final-score'),
             overHighScore: document.getElementById('game-over-high-score'),
             creditsFinalScore: document.getElementById('credits-final-score'),
-            creditsHighScore: document.getElementById('credits-high-score'),
             camMode: document.getElementById('camera-display'),
             btnStart: document.getElementById('start-btn'),
             btnRestart: document.getElementById('restart-btn'),
-            btnCreditsRestart: document.getElementById('credits-restart-btn')
+            btnCreditsRestart: document.getElementById('credits-restart-btn'),
+            nameInputOverlay: document.getElementById('name-input-overlay'),
+            nameInput: document.getElementById('player-name-input'),
+            btnSaveScore: document.getElementById('save-score-btn'),
+            hofList: document.getElementById('hof-list')
         };
 
         // Procedural generation as fallback 
@@ -408,7 +494,7 @@
             createPlayer();
 
             // Set initial high score display
-            ui.highScore.innerText = `HI-SCORE: ${highScore}`;
+            ui.highScore.innerText = `HI-SCORE: ${currentHighScore}`;
 
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
@@ -418,6 +504,7 @@
             if(ui.btnStart) ui.btnStart.addEventListener('click', () => startLevel(1));
             if(ui.btnRestart) ui.btnRestart.addEventListener('click', () => startLevel(1));
             if(ui.btnCreditsRestart) ui.btnCreditsRestart.addEventListener('click', resetToMenu);
+            if(ui.btnSaveScore) ui.btnSaveScore.addEventListener('click', saveScoreAndContinue);
 
             clock = new THREE.Clock();
             animate();
@@ -450,10 +537,10 @@
                 fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
             });
             earthSprite = new THREE.Sprite(earthMat);
-            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges changed to -400-1050
+            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges
             earthSprite.scale.set(4000, 2250, 1);
             // Positioned deep to stay behind stars, and shifted down to show a nice orbital curve
-            earthSprite.position.set(0, -400, -1150);
+            earthSprite.position.set(0, -300, -950);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
@@ -560,12 +647,66 @@
             }
         }
 
-        function checkHighScore() {
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('spaceShootHighScore', highScore);
-                ui.highScore.innerText = `HI-SCORE: ${highScore}`;
+        function isHighScore(score) {
+            // Check if score is higher than the lowest in the top 5, or if we have less than 5 scores
+            if (highScores.length < MAX_HIGH_SCORES) return true;
+            return score > highScores[highScores.length - 1].score;
+        }
+
+        function promptHighScore() {
+            state = 'NAME_INPUT';
+            ui.hud.style.display = 'none';
+            ui.over.style.display = 'none';
+            ui.start.style.display = 'none';
+            ui.credits.style.display = 'none';
+            
+            ui.nameInputOverlay.style.display = 'flex';
+            ui.nameInput.value = '';
+            ui.nameInput.focus();
+        }
+
+        function saveScoreAndContinue() {
+            let name = ui.nameInput.value.trim().toUpperCase() || 'PILOT';
+            
+            // Add and sort the array
+            highScores.push({ name: name, score: score });
+            highScores.sort((a, b) => b.score - a.score);
+            
+            // Keep only top 5
+            if (highScores.length > MAX_HIGH_SCORES) {
+                highScores = highScores.slice(0, MAX_HIGH_SCORES);
             }
+            
+            // Save to local storage
+            localStorage.setItem('spaceShootHighScores', JSON.stringify(highScores));
+            
+            // Update HUD tracking
+            currentHighScore = highScores[0].score;
+            ui.highScore.innerText = `HI-SCORE: ${currentHighScore}`;
+            
+            ui.nameInputOverlay.style.display = 'none';
+            
+            // Proceed to appropriate screen
+            if (level === 9 && killsInLevel > 0 && enemies.length === 0) {
+                showCredits(); // From triggerEnding
+            } else {
+                showGameOver(); // From standard death
+            }
+        }
+
+        function buildHallOfFameHTML() {
+            ui.hofList.innerHTML = ''; // clear existing
+            if (highScores.length === 0) {
+                ui.hofList.innerHTML = '<div class="hof-entry"><span class="hof-name">NO SCORES YET</span></div>';
+                return;
+            }
+            
+            highScores.forEach((entry, index) => {
+                const el = document.createElement('div');
+                el.className = 'hof-entry';
+                el.innerHTML = `<span class="hof-name">${index + 1}. ${entry.name}</span><span class="hof-score">${entry.score}</span>`;
+                ui.hofList.appendChild(el);
+            });
         }
 
         function startLevel(lvlNum) {
@@ -669,13 +810,23 @@
         }
 
         function triggerEnding() {
+            if (score > 0 && isHighScore(score)) {
+                promptHighScore();
+            } else {
+                showCredits();
+            }
+        }
+        
+        function showCredits() {
             state = 'CINEMATIC';
             ui.start.style.display = 'none';
             ui.over.style.display = 'none';
             ui.hud.style.display = 'none';
-            checkHighScore();
+            ui.nameInputOverlay.style.display = 'none';
+            
+            buildHallOfFameHTML();
+            
             ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
-            ui.creditsHighScore.innerText = `HIGH SCORE: ${highScore}`;
             
             // Reset credits animation by forcing a reflow
             const scrollEl = document.querySelector('.credits-scroll');
@@ -685,7 +836,7 @@
         }
 
         function update(dt) {
-            if (state === 'MENU' || state === 'CREDITS') return;
+            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_INPUT') return;
 
             // Camera Screenshake reduction
             if (isScreenShaking > 0) {
@@ -819,11 +970,21 @@
                         e.mesh.position.x += Math.cos(e.time * 2) * 16;
                         e.mesh.position.y = Math.sin(e.time * 3) * 12;
                     }
-                    
-                    // Firing routines
-                    if(Math.random() < (e.behavior === 'mothership_boss' ? 0.045 : 0.022)) {
-                        spawnLaser(true, e.mesh, {x: (Math.random()-0.5)*15, y:-4, z:6});
-                    }
+                }
+
+                // Generic Enemy Firing Routine (All non-asteroids can shoot)
+                if (e.behavior !== 'obstacle') {
+                     // Determine fire rate based on behavior. Bosses shoot more often.
+                     const fireChance = e.behavior.includes('boss') ? (e.behavior === 'mothership_boss' ? 0.045 : 0.022) : 0.005;
+                     
+                     if (Math.random() < fireChance) {
+                         // Shoot from enemy position towards player direction (simplified as straight down z)
+                         spawnLaser(true, e.mesh, {
+                             x: (Math.random()-0.5) * (e.behavior.includes('boss') ? 15 : 2), 
+                             y: e.behavior === 'mothership_boss' ? -4 : 0, 
+                             z: 6
+                         });
+                     }
                 }
 
                 // Crash metrics (Asteroid triggers instant high drop)
@@ -899,23 +1060,31 @@
             ui.health.style.color = health <= 30 ? '#ff0000' : '#00ff00';
             
             // Live high score update check
-            if (score > highScore) {
+            if (score > currentHighScore) {
                 ui.highScore.style.color = '#ff00ff';
                 ui.highScore.innerText = `HI-SCORE: ${score}`;
             }
         }
 
         function gameOver() {
-            state = 'MENU';
-            ui.hud.style.display = 'none';
-            ui.over.style.display = 'flex';
-            
-            checkHighScore();
-            ui.finalScore.innerText = `SCORE: ${score}`;
-            ui.overHighScore.innerText = `HIGH SCORE: ${highScore}`;
-            
             createExplosion(playerShip.position, 0xff0000);
             playerShip.position.set(0, -100, 0); 
+            
+            if (score > 0 && isHighScore(score)) {
+                promptHighScore();
+            } else {
+                showGameOver();
+            }
+        }
+
+        function showGameOver() {
+            state = 'MENU';
+            ui.hud.style.display = 'none';
+            ui.nameInputOverlay.style.display = 'none';
+            ui.over.style.display = 'flex';
+            
+            ui.finalScore.innerText = `SCORE: ${score}`;
+            ui.overHighScore.innerText = `HIGH SCORE: ${currentHighScore}`;
         }
 
         function resetToMenu() {
