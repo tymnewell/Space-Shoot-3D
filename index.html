@@ -160,7 +160,7 @@
             bottom: -180%;
             width: 100%;
             text-align: center;
-            animation: scrollUp 20s linear forwards;
+            animation: scrollUp 60s linear forwards;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -455,10 +455,10 @@
                 fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
             });
             earthSprite = new THREE.Sprite(earthMat);
-            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges changed to -200
+            // MASSIVE scale so it fills all monitor aspect ratios without seeing edges changed to -100-850
             earthSprite.scale.set(4000, 2250, 1);
             // Positioned deep to stay behind stars, and shifted down to show a nice orbital curve
-            earthSprite.position.set(0, -200, -950);
+            earthSprite.position.set(0, -100, -850);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
