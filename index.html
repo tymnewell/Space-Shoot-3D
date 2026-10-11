@@ -157,17 +157,17 @@
         .credits-container { width: 100%; height: 100%; overflow: hidden; position: relative; }
         .credits-scroll {
             position: absolute;
-            bottom: -160%;
+            bottom: -180%;
             width: 100%;
             text-align: center;
-            animation: scrollUp 20s linear forwards;
+            animation: scrollUp 60s linear forwards;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .credits-scroll h2 { color: #00ffff; margin-bottom: 30px; font-size: 20px; }
         .credits-scroll p { margin-bottom: 15px; font-size: 10px; color: #ccc; line-height: 2; }
-        .credits-logo {  }
+        .credits-logo {}
 
         @keyframes scrollUp {
             0% { bottom: -110%; }
@@ -234,12 +234,12 @@
                 <p>Newell Web Solutions</p>
                 <p><br></p>
                 <p>LEVEL DESIGN & ART</p>
-                <p>Gemini & Newell Web Solutions</p>
+                <p>Gemini AI & Newell Web Solutions</p>
                 <p><br></p>
                 <p><br></p>
                 <p>THANKS FOR PLAYING!</p>
-<p><img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';"></p>
                 <p>SPACE SHOOT 3D</p>
+                <p><img class="credits-logo" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';"></p>
             </div>
         </div>
         <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
@@ -356,10 +356,10 @@
                 ctx.fillStyle = '#ff6600'; ctx.fillRect(10, 30, 8, 8); ctx.fillRect(46, 30, 8, 8);
                 ctx.fillStyle = '#444'; ctx.beginPath(); ctx.moveTo(32, 64); ctx.lineTo(64, 20); ctx.lineTo(0, 20); ctx.fill();
             } else if (type === 'earth') {
-                canvas.width = 256; canvas.height = 256;
-                ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(100, 100, 35, 0, Math.PI*2); ctx.arc(160, 130, 45, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(128, 30, 25, 0, Math.PI*2); ctx.fill();
+                canvas.width = 512; canvas.height = 288; // Updated fallback to 16:9
+                ctx.fillStyle = '#0e2340'; ctx.beginPath(); ctx.arc(256, 256, 240, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#1e7323'; ctx.beginPath(); ctx.arc(200, 200, 70, 0, Math.PI*2); ctx.arc(320, 260, 90, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(256, 60, 50, 0, Math.PI*2); ctx.fill();
             }
 
             return canvas.toDataURL();
@@ -443,10 +443,15 @@
             asteroidFieldGrp.visible = false;
 
             // Earth backdrop L9
-            const earthMat = new THREE.SpriteMaterial({ map: textures.earth, color: 0xffffff });
+            const earthMat = new THREE.SpriteMaterial({ 
+                map: textures.earth, 
+                color: 0xffffff,
+                fog: false // CRITICAL FIX: prevents the earth from turning completely black in the fog
+            });
             earthSprite = new THREE.Sprite(earthMat);
-            earthSprite.scale.set(380, 380, 1);
-            earthSprite.position.set(0, -60, -900);
+            // Updated scale to a massive 16:9 cinematic background
+            earthSprite.scale.set(1600, 900, 1);
+            earthSprite.position.set(0, -100, -900);
             scene.add(earthSprite);
             earthSprite.visible = false;
         }
