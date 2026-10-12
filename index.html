@@ -205,7 +205,14 @@
             levelUp: 'level_up.mp3',
             menuMusic: 'menu_music.mp3',
             endMusic: 'end_music.mp3',
-            getReady: 'getready.mp3' // Added Get Ready voice line
+            getReady: 'getready.mp3',
+            watchItFiring: 'watchitfiring.mp3',
+            lEnergyPods: 'lenergypods.mp3',
+            lDodgeAst: 'ldodgeast.mp3',
+            timeToDoDamage: 'timetododamage.mp3',
+            granEnergyPods: 'granenergypods.mp3',
+            moonSiege: 'moonsiege.mp3',
+            finalMission: 'finalmission.mp3'
         };
 
         // --- Game Constants & Variables ---
@@ -218,6 +225,7 @@
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
+        let voPlayed = false; // Tracks mid-level voiceover triggers
         const KILLS_TO_ADVANCE = 15;
 
         // Cinematic variables
@@ -548,7 +556,7 @@
 
         function startLevel(lvlNum) {
             stopAllMusic(); 
-            level = lvlNum; killsInLevel = 0; 
+            level = lvlNum; killsInLevel = 0; voPlayed = false;
             ui.start.style.display = 'none'; ui.over.style.display = 'none'; ui.credits.style.display = 'none'; ui.hud.style.display = 'none';
             
             [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
@@ -568,7 +576,7 @@
                 playerShip.position.set(0, 15, 100); // Start far back
                 playerShip.rotation.set(0, 0, 0);
 
-                if (audioInteracted) playMusic('getReady'); // Play the new speech audio here
+                if (audioInteracted) playMusic('getReady'); 
 
                 ui.transition.style.display = 'flex'; 
                 ui.lvlText.innerText = "PREPARE FOR LAUNCH";
@@ -580,7 +588,10 @@
                     ui.hud.style.display = 'block'; 
                     state = 'PLAYING'; 
                     ui.lvlText.style.color = '#ff00ff'; // Reset color
-                    if(audioInteracted) playMusic('levelUp');
+                    if(audioInteracted) {
+                        playMusic('levelUp');
+                        setTimeout(() => playMusic('watchItFiring'), 800); // Stagger VO right after levelUp starts
+                    }
                 }, 8000);
             } else {
                 state = 'TRANSITION';
@@ -592,7 +603,23 @@
                 else if (level === 9) ui.lvlText.innerText = "LUNAR SIEGE";
                 else ui.lvlText.innerText = `LEVEL ${level}`;
                 
-                setTimeout(() => { ui.transition.style.display = 'none'; ui.hud.style.display = 'block'; state = 'PLAYING'; }, 2400);
+                setTimeout(() => { 
+                    ui.transition.style.display = 'none'; 
+                    ui.hud.style.display = 'block'; 
+                    state = 'PLAYING'; 
+                    
+                    // Trigger "Start of Level" VOs
+                    if (audioInteracted) {
+                        if (level === 2) playMusic('lDodgeAst');
+                        else if (level === 3) playMusic('timeToDoDamage');
+                        else if (level === 4) playMusic('watchItFiring');
+                        else if (level === 5) playMusic('watchItFiring');
+                        else if (level === 6) playMusic('watchItFiring');
+                        else if (level === 8) playMusic('timeToDoDamage');
+                        else if (level === 9) playMusic('moonSiege');
+                        else if (level === 10) playMusic('finalMission');
+                    }
+                }, 2400);
             }
         }
 
@@ -607,6 +634,14 @@
 
         function levelDirector(dt) {
             if (Math.random() < 0.003 && state === 'PLAYING') spawnEnergyPod();
+
+            // Trigger mid-level VOs exactly when enough kills have accumulated in that specific stage
+            if (!voPlayed && audioInteracted && state === 'PLAYING') {
+                if (level === 1 && killsInLevel >= 4) { playMusic('lEnergyPods'); voPlayed = true; }
+                else if (level === 5 && killsInLevel >= 6) { playMusic('granEnergyPods'); voPlayed = true; }
+                else if (level === 7 && killsInLevel >= 6) { playMusic('lEnergyPods'); voPlayed = true; }
+                else if (level === 9 && killsInLevel >= 6) { playMusic('granEnergyPods'); voPlayed = true; }
+            }
 
             if (enemies.length < 5 + level && Math.random() < 0.032 && state === 'PLAYING') {
                 if (level === 1 || level === 5) spawnEnemy('enemyBlueGreen', 7, 1, 'straight');
