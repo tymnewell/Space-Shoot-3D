@@ -150,7 +150,7 @@
 
     <div id="credits-screen" class="overlay">
         <div class="credits-container">
-            <div class="credits-scroll">
+            <div class="credits-scroll" id="main-credits-scroll">
                 <h2>MISSION ACCOMPLISHED</h2>
                 <p>EARTH IS SAVED</p>
                 <h3 id="credits-final-score" style="color: #ffcc00; margin: 20px 0;">FINAL SCORE: 0</h3>
@@ -220,19 +220,19 @@
         const SHIP_SPEED = 45;
         const FIRE_RATE = 0.14;
         
-        let state = 'MENU'; // MENU, PLAYING, TRANSITION, INTRO_CINEMATIC, CINEMATIC, CREDITS, NAME_ENTRY
+        let state = 'MENU'; // MENU, PLAYING, TRANSITION, INTRO_CINEMATIC, CINEMATIC, CREDITS, NAME_ENTRY, ROUTING
         let score = 0;
         let health = 100;
         let level = 1;
         let killsInLevel = 0;
-        let voPlayed = false; // Tracks mid-level voiceover triggers
+        let voPlayed = false; 
         const KILLS_TO_ADVANCE = 15;
 
         // Cinematic variables
         let introTimer = 0;
 
         // Joystick High Score Entry Variables
-        let initials = [0, 0, 0]; // A=0, Z=25
+        let initials = [0, 0, 0]; 
         let charIndex = 0;
         const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let isVictoryEnding = false;
@@ -347,34 +347,35 @@
             osc.connect(gain); gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
 
+            // VOLUME DUCKED to allow Voice Overs to punch through
             if (type === 'shoot') {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(880, now);
                 osc.frequency.exponentialRampToValueAtTime(110, now + 0.1);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                gain.gain.setValueAtTime(0.04, now); 
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
                 osc.start(now); osc.stop(now + 0.1);
             } else if (type === 'hit') {
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(150, now);
                 osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                gain.gain.setValueAtTime(0.08, now); 
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                 osc.start(now); osc.stop(now + 0.2);
             } else if (type === 'heal') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(440, now);
                 osc.frequency.linearRampToValueAtTime(880, now + 0.1);
                 osc.frequency.linearRampToValueAtTime(1320, now + 0.2);
-                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.setValueAtTime(0.1, now); 
                 gain.gain.linearRampToValueAtTime(0, now + 0.3);
                 osc.start(now); osc.stop(now + 0.3);
             } else if (type === 'explode') {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(100, now);
                 osc.frequency.exponentialRampToValueAtTime(10, now + 0.5);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                gain.gain.setValueAtTime(0.12, now); 
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
                 osc.start(now); osc.stop(now + 0.5);
             }
         }
@@ -384,10 +385,10 @@
                 const audio = new Audio(src);
                 if (key.toLowerCase().includes('music')) {
                     audio.loop = true; 
-                    audio.volume = 0.6;
+                    audio.volume = 0.4; // Soft background music
                 } else {
                     audio.loop = false; 
-                    audio.volume = 0.6;
+                    audio.volume = 1.0; // MAX Volume for Voice Overs
                 }
                 sfx[key] = audio;
             }
@@ -526,29 +527,37 @@
             
             ui.highScore.innerText = `HI-SCORE: ${highScores[0].score}`;
             ui.nameEntry.style.display = 'none';
-            playRetroSound('heal'); // confirmation sound
+            playRetroSound('heal'); 
             proceedToEndScreen();
         }
 
         function proceedToEndScreen() {
+            state = 'CREDITS'; // LOCK STATE TO PREVENT LOOPING
             buildHallOfFame();
             if (isVictoryEnding) {
                 ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
                 ui.credits.style.display = 'flex';
-                const scrollEl = document.querySelector('.credits-scroll');
-                scrollEl.style.animation = 'none'; scrollEl.offsetHeight; scrollEl.style.animation = null; 
+                const scrollEl = document.getElementById('main-credits-scroll');
+                
+                // Force CSS Animation Reset
+                scrollEl.style.animation = 'none';
+                void scrollEl.offsetWidth; // Trigger reflow
+                scrollEl.style.animation = 'scrollUp 50s linear forwards';
             } else {
                 ui.finalScore.innerText = `SCORE: ${score}`;
                 ui.over.style.display = 'flex';
                 
-                // Triggers credits sequence 20 seconds after death (reduced from 60s)
                 setTimeout(() => {
                     if (ui.over.style.display === 'flex') {
                         ui.over.style.display = 'none';
                         ui.creditsFinalScore.innerText = `FINAL SCORE: ${score}`;
                         ui.credits.style.display = 'flex';
-                        const scrollEl = document.querySelector('.credits-scroll');
-                        scrollEl.style.animation = 'none'; scrollEl.offsetHeight; scrollEl.style.animation = null; 
+                        const scrollEl = document.getElementById('main-credits-scroll');
+                        
+                        // Force CSS Animation Reset
+                        scrollEl.style.animation = 'none';
+                        void scrollEl.offsetWidth; // Trigger reflow
+                        scrollEl.style.animation = 'scrollUp 50s linear forwards';
                     }
                 }, 20000);
             }
@@ -573,7 +582,7 @@
             if (level === 1) {
                 state = 'INTRO_CINEMATIC';
                 introTimer = 0;
-                playerShip.position.set(0, 15, 100); // Start far back
+                playerShip.position.set(0, 15, 100); 
                 playerShip.rotation.set(0, 0, 0);
 
                 if (audioInteracted) playMusic('getReady'); 
@@ -587,10 +596,10 @@
                     ui.transition.style.display = 'none'; 
                     ui.hud.style.display = 'block'; 
                     state = 'PLAYING'; 
-                    ui.lvlText.style.color = '#ff00ff'; // Reset color
+                    ui.lvlText.style.color = '#ff00ff'; 
                     if(audioInteracted) {
                         playMusic('levelUp');
-                        setTimeout(() => playMusic('watchItFiring'), 800); // Stagger VO right after levelUp starts
+                        setTimeout(() => playMusic('watchItFiring'), 800); 
                     }
                 }, 8000);
             } else {
@@ -608,7 +617,6 @@
                     ui.hud.style.display = 'block'; 
                     state = 'PLAYING'; 
                     
-                    // Trigger "Start of Level" VOs
                     if (audioInteracted) {
                         if (level === 2) playMusic('lDodgeAst');
                         else if (level === 3) playMusic('timeToDoDamage');
@@ -635,7 +643,7 @@
         function levelDirector(dt) {
             if (Math.random() < 0.003 && state === 'PLAYING') spawnEnergyPod();
 
-            // Trigger mid-level VOs exactly when enough kills have accumulated in that specific stage
+            // Trigger mid-level VOs exactly when enough kills have accumulated
             if (!voPlayed && audioInteracted && state === 'PLAYING') {
                 if (level === 1 && killsInLevel >= 4) { playMusic('lEnergyPods'); voPlayed = true; }
                 else if (level === 5 && killsInLevel >= 6) { playMusic('granEnergyPods'); voPlayed = true; }
@@ -658,7 +666,6 @@
                         spawnEnemy('mothership', 65, 120, 'mothership_boss'); // Huge health boost!
                         for(let i=0; i<6; i++) spawnEnemy('ufo', 16, 12, 'boss_minion');
                     } else if (enemies.some(e => e.behavior === 'mothership_boss') && enemies.length < 15 && Math.random() < 0.08) {
-                        // The mothership continuously spawns reinforcements!
                         spawnEnemy(Math.random() < 0.6 ? 'ufo' : 'enemyRed', 16, 10, 'boss_minion');
                     }
                 }
@@ -675,7 +682,6 @@
                 if (killsInLevel >= KILLS_TO_ADVANCE) startLevel(10); 
             } 
             else if (level === 10) { 
-                // Ensure the mothership has been defeated before ending
                 if (killsInLevel > 0 && !enemies.some(e => e.behavior === 'mothership_boss')) triggerEnding(); 
             }
         }
@@ -683,23 +689,19 @@
         function triggerEnding() {
             state = 'CINEMATIC'; ui.hud.style.display = 'none'; ui.start.style.display = 'none'; ui.over.style.display = 'none';
             stopAllMusic(); playMusic('endMusic');
-            
-            setTimeout(() => { checkHighScoreAndRoute(true); }, 1000);
         }
 
         function update(dt) {
-            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_ENTRY') return;
+            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_ENTRY' || state === 'ROUTING') return;
 
             if (isScreenShaking > 0) {
                 isScreenShaking -= dt * 3;
                 camera.position.x += (Math.random() - 0.5) * isScreenShaking * 3.5; camera.position.y += (Math.random() - 0.5) * isScreenShaking * 3.5;
             } else { updateCameraPosition(); }
 
-            // Dynamic Star Speed based on Cinematic State
             let starSpeed = 230;
             if (state === 'INTRO_CINEMATIC') {
                 introTimer += dt;
-                // Starts hyper-fast and slows down over 6 seconds
                 starSpeed = introTimer < 6 ? 2000 - (introTimer * 300) : 230;
             }
 
@@ -712,17 +714,15 @@
             }
 
             if (state === 'INTRO_CINEMATIC') {
-                // Fly-in Sequence
                 if (introTimer < 3) {
                     playerShip.position.z += (10 - playerShip.position.z) * 2 * dt;
-                    playerShip.rotation.z = introTimer * Math.PI * 2; // Barrel Roll
+                    playerShip.rotation.z = introTimer * Math.PI * 2; 
                 } else if (introTimer < 6) {
                     playerShip.position.z += (15 - playerShip.position.z) * 3 * dt;
                     playerShip.position.y += (Math.sin(introTimer * 4) * 8 - playerShip.position.y) * 2 * dt;
                     playerShip.position.x += (Math.cos(introTimer * 3) * 10 - playerShip.position.x) * 2 * dt;
-                    playerShip.rotation.z = Math.cos(introTimer * 3) * 0.4; // Strafe tilt
+                    playerShip.rotation.z = Math.cos(introTimer * 3) * 0.4; 
                 } else {
-                    // Lock into start position
                     playerShip.position.z += (15 - playerShip.position.z) * 4 * dt;
                     playerShip.position.y += (-15 - playerShip.position.y) * 4 * dt;
                     playerShip.position.x += (0 - playerShip.position.x) * 4 * dt;
@@ -733,9 +733,14 @@
             }
 
             if (state === 'TRANSITION') { playerShip.position.y += (0 - playerShip.position.y) * 2.2 * dt; return; }
+            
+            // Loop Fix: Transition state immediately to prevent multi-firing
             if (state === 'CINEMATIC') {
                 playerShip.position.z -= 45 * dt; playerShip.position.y -= 10 * dt; playerShip.scale.multiplyScalar(0.992);
-                if(playerShip.position.z < -260) checkHighScoreAndRoute(true);
+                if(playerShip.position.z < -260) {
+                    state = 'ROUTING';
+                    checkHighScoreAndRoute(true);
+                }
                 return;
             }
 
@@ -831,7 +836,7 @@
         }
 
         function gameOver() {
-            ui.hud.style.display = 'none';
+            ui.hud.style.display = 'none'; state = 'ROUTING';
             stopAllMusic(); playMusic('endMusic');
             createExplosion(playerShip.position, 0xff0000); playerShip.position.set(0, -100, 0); 
             setTimeout(() => { checkHighScoreAndRoute(false); }, 500);
@@ -843,7 +848,6 @@
         }
 
         function onKeyDown(e) {
-            // Arcade Name Entry Block
             if (state === 'NAME_ENTRY') {
                 if (e.code === 'KeyA' || e.code === 'ArrowLeft') { charIndex = Math.max(0, charIndex - 1); playRetroSound('shoot'); }
                 if (e.code === 'KeyD' || e.code === 'ArrowRight') { charIndex = Math.min(2, charIndex + 1); playRetroSound('shoot'); }
@@ -860,9 +864,9 @@
             if (e.code === 'Space') keys.space = true;
             if (e.code === 'KeyC') toggleCameraMode();
 
-            if (e.code === 'Digit9') startLevel(9); // Cheat: skip to Moon Siege
-            if (e.code === 'Digit8') startLevel(10); // Cheat: skip to Boss Level
-            if (e.code === 'Digit0') triggerEnding();
+            if (e.code === 'Digit9') startLevel(9); 
+            if (e.code === 'Digit8') startLevel(10); 
+            if (e.code === 'Digit0') { state='CINEMATIC'; playerShip.position.z = 0; }
         }
 
         function onKeyUp(e) {
