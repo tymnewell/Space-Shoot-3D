@@ -121,12 +121,10 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logosmall.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
-  </div><p><BR>
-  </div><p><BR>
+        <p><BR>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-
-        </div><p><BR>
+        <p><BR>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
     </div>
@@ -396,13 +394,13 @@
                 const audio = new Audio(src);
                 if (key === 'menuMusic') {
                     audio.loop = true; 
-                    audio.volume = 0.15; // Low constant level throughout gameplay
+                    audio.volume = 0.4; // Loud for menu
                 } else if (key === 'endMusic') {
                     audio.loop = true; 
-                    audio.volume = 0.4; 
+                    audio.volume = 0.4; // Loud for end credits
                 } else {
                     audio.loop = false; 
-                    audio.volume = 1.0; // Voice overs set to maximum
+                    audio.volume = 1.0; // Max volume for Voice Overs
                 }
                 sfx[key] = audio;
             }
@@ -414,7 +412,7 @@
         }
 
         function stopAllMusic() {
-            // Only stop endMusic, allowing menuMusic to play continuously across levels
+            // ONLY stop the dramatic end credits music, allow the ambient loop to persist dynamically
             if(sfx.endMusic) { sfx.endMusic.pause(); sfx.endMusic.currentTime = 0; }
         }
 
@@ -601,7 +599,11 @@
             earthSprite.visible = false; moonSprite.visible = false;
             asteroidFieldGrp.visible = true; populateAsteroidField();
             
-            stopAllMusic(); if (audioInteracted && sfx.menuMusic && sfx.menuMusic.paused) playMusic('menuMusic'); 
+            stopAllMusic(); 
+            if (sfx.menuMusic) {
+                sfx.menuMusic.volume = 0.4; // Demo is loud
+                if (audioInteracted && sfx.menuMusic.paused) playMusic('menuMusic'); 
+            }
         }
 
         function showDemoCredits() {
@@ -628,7 +630,11 @@
             document.getElementById('demo-overlay').style.display = 'none';
             
             playerShip.scale.setScalar(1); playerShip.position.set(0, -15, 15); playerShip.rotation.set(0, 0, 0);
-            stopAllMusic(); if(audioInteracted && sfx.menuMusic && sfx.menuMusic.paused) playMusic('menuMusic');
+            stopAllMusic(); 
+            if(sfx.menuMusic) {
+                sfx.menuMusic.volume = 0.4; // Bring menu music back up
+                if(audioInteracted && sfx.menuMusic.paused) playMusic('menuMusic');
+            }
             
             [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
             lasers.length = 0; enemies.length = 0; particles.length = 0; energyPods.length = 0;
@@ -637,6 +643,8 @@
 
         function startLevel(lvlNum) {
             stopAllMusic(); 
+            if(sfx.menuMusic) sfx.menuMusic.volume = 0.08; // Dip music volume for gameplay loop
+            
             level = lvlNum; killsInLevel = 0; voPlayed = false;
             ui.start.style.display = 'none'; ui.over.style.display = 'none'; ui.credits.style.display = 'none'; ui.hud.style.display = 'none';
             
@@ -759,7 +767,7 @@
         function triggerEnding() {
             state = 'CINEMATIC'; ui.hud.style.display = 'none'; ui.start.style.display = 'none'; ui.over.style.display = 'none';
             stopAllMusic(); 
-            if(sfx.menuMusic) sfx.menuMusic.pause();
+            if(sfx.menuMusic) sfx.menuMusic.pause(); // Ensure ambient hum stops for big cinematic
             playMusic('endMusic');
         }
 
