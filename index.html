@@ -121,11 +121,12 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logosmall.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
-<p><BR>
-<p><BR>
+  </div><p><BR>
+  </div><p><BR>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-<p><BR>
+
+        </div><p><BR>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
     </div>
@@ -393,12 +394,15 @@
         function initAudio() {
             for (const [key, src] of Object.entries(AUDIO_FILES)) {
                 const audio = new Audio(src);
-                if (key.toLowerCase().includes('music')) {
+                if (key === 'menuMusic') {
+                    audio.loop = true; 
+                    audio.volume = 0.15; // Low constant level throughout gameplay
+                } else if (key === 'endMusic') {
                     audio.loop = true; 
                     audio.volume = 0.4; 
                 } else {
                     audio.loop = false; 
-                    audio.volume = 1.0; 
+                    audio.volume = 1.0; // Voice overs set to maximum
                 }
                 sfx[key] = audio;
             }
@@ -410,8 +414,8 @@
         }
 
         function stopAllMusic() {
-            if(sfx.menuMusic) sfx.menuMusic.pause();
-            if(sfx.endMusic) sfx.endMusic.pause();
+            // Only stop endMusic, allowing menuMusic to play continuously across levels
+            if(sfx.endMusic) { sfx.endMusic.pause(); sfx.endMusic.currentTime = 0; }
         }
 
         function init() {
@@ -597,7 +601,7 @@
             earthSprite.visible = false; moonSprite.visible = false;
             asteroidFieldGrp.visible = true; populateAsteroidField();
             
-            stopAllMusic(); if (audioInteracted) playMusic('menuMusic'); 
+            stopAllMusic(); if (audioInteracted && sfx.menuMusic && sfx.menuMusic.paused) playMusic('menuMusic'); 
         }
 
         function showDemoCredits() {
@@ -624,7 +628,7 @@
             document.getElementById('demo-overlay').style.display = 'none';
             
             playerShip.scale.setScalar(1); playerShip.position.set(0, -15, 15); playerShip.rotation.set(0, 0, 0);
-            stopAllMusic(); if(audioInteracted) playMusic('menuMusic');
+            stopAllMusic(); if(audioInteracted && sfx.menuMusic && sfx.menuMusic.paused) playMusic('menuMusic');
             
             [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
             lasers.length = 0; enemies.length = 0; particles.length = 0; energyPods.length = 0;
@@ -754,7 +758,9 @@
 
         function triggerEnding() {
             state = 'CINEMATIC'; ui.hud.style.display = 'none'; ui.start.style.display = 'none'; ui.over.style.display = 'none';
-            stopAllMusic(); playMusic('endMusic');
+            stopAllMusic(); 
+            if(sfx.menuMusic) sfx.menuMusic.pause();
+            playMusic('endMusic');
         }
 
         function update(dt) {
@@ -931,17 +937,28 @@
 
         function gameOver() {
             ui.hud.style.display = 'none'; state = 'ROUTING';
-            stopAllMusic(); playMusic('endMusic');
+            stopAllMusic(); 
+            if(sfx.menuMusic) sfx.menuMusic.pause();
+            playMusic('endMusic');
             createExplosion(playerShip.position, 0xff0000); playerShip.position.set(0, -100, 0); 
             setTimeout(() => { checkHighScoreAndRoute(false); }, 500);
         }
 
         function onKeyDown(e) {
+            // Arcade Cabinet Exit Mapping (Q Key)
+            if (e.code === 'KeyQ') {
+                window.location.href = '/'; // Adjust this URL to match your overarching arcade frontend path
+                return;
+            }
+
             interruptDemo(); // Any keypress kills demo mode
 
             if (state === 'MENU') {
                 if (e.code === 'Space' || e.code === 'Enter') {
-                    if (!audioInteracted) audioInteracted = true;
+                    if (!audioInteracted) {
+                        audioInteracted = true;
+                        playMusic('menuMusic');
+                    }
                     startLevel(1);
                     return;
                 }
