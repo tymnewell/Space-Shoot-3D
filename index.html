@@ -204,7 +204,8 @@
         const AUDIO_FILES = {
             levelUp: 'level_up.mp3',
             menuMusic: 'menu_music.mp3',
-            endMusic: 'end_music.mp3'
+            endMusic: 'end_music.mp3',
+            getReady: 'getready.mp3' // Added Get Ready voice line
         };
 
         // --- Game Constants & Variables ---
@@ -566,6 +567,8 @@
                 introTimer = 0;
                 playerShip.position.set(0, 15, 100); // Start far back
                 playerShip.rotation.set(0, 0, 0);
+
+                if (audioInteracted) playMusic('getReady'); // Play the new speech audio here
 
                 ui.transition.style.display = 'flex'; 
                 ui.lvlText.innerText = "PREPARE FOR LAUNCH";
