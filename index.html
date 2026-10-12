@@ -121,9 +121,10 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logosmall.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
+<p><BR>
+<p><BR>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-<p><BR>
 <p><BR>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
@@ -937,6 +938,14 @@
 
         function onKeyDown(e) {
             interruptDemo(); // Any keypress kills demo mode
+
+            if (state === 'MENU') {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    if (!audioInteracted) audioInteracted = true;
+                    startLevel(1);
+                    return;
+                }
+            }
 
             if (state === 'CREDITS') {
                 if (e.code === 'Space' || e.code === 'Enter') { resetToMenu(); return; }
