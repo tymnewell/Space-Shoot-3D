@@ -239,6 +239,7 @@
         let demoTimer = 0;
         let isDemo = false;
         let demoTimeout;
+        let creditsTimeout;
 
         // Joystick High Score Entry Variables
         let initials = [0, 0, 0]; 
@@ -552,6 +553,10 @@
                 scrollEl.style.animation = 'none';
                 void scrollEl.offsetWidth; // Trigger reflow
                 scrollEl.style.animation = 'scrollUp 50s linear forwards';
+
+                // AUTO RETURN TO MENU AFTER CREDITS FINISH
+                clearTimeout(creditsTimeout);
+                creditsTimeout = setTimeout(() => { if (state === 'CREDITS') resetToMenu(); }, 55000);
             } else {
                 ui.finalScore.innerText = `SCORE: ${score}`;
                 ui.over.style.display = 'flex';
@@ -567,6 +572,10 @@
                         scrollEl.style.animation = 'none';
                         void scrollEl.offsetWidth; // Trigger reflow
                         scrollEl.style.animation = 'scrollUp 50s linear forwards';
+
+                        // AUTO RETURN TO MENU AFTER CREDITS FINISH
+                        clearTimeout(creditsTimeout);
+                        creditsTimeout = setTimeout(() => { if (state === 'CREDITS') resetToMenu(); }, 55000);
                     }
                 }, 20000);
             }
@@ -608,7 +617,7 @@
         }
 
         function resetToMenu() {
-            isDemo = false; attractTimer = 0; clearTimeout(demoTimeout);
+            isDemo = false; attractTimer = 0; clearTimeout(demoTimeout); clearTimeout(creditsTimeout);
             state = 'MENU'; ui.credits.style.display = 'none'; ui.start.style.display = 'flex'; 
             ui.hud.style.display = 'none'; ui.over.style.display = 'none'; ui.nameEntry.style.display = 'none';
             document.getElementById('demo-overlay').style.display = 'none';
@@ -923,6 +932,10 @@
 
         function onKeyDown(e) {
             interruptDemo(); // Any keypress kills demo mode
+
+            if (state === 'CREDITS') {
+                if (e.code === 'Space' || e.code === 'Enter') { resetToMenu(); return; }
+            }
 
             if (state === 'NAME_ENTRY') {
                 if (e.code === 'KeyA' || e.code === 'ArrowLeft') { charIndex = Math.max(0, charIndex - 1); playRetroSound('shoot'); }
