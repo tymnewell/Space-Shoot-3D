@@ -121,15 +121,11 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logosmall.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
+<p><br></p>
         <p><br></p>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-        <div class="sub-message" style="line-height: 2;">
-            ARROWS/JOYSTICK : Navigate | SPACE (FIRE) : Shoot<br>
-            V : Change View | P : Pause | ESC : Quit<br>
-            R / SPACE : Start Game | H : High Scores<br>
-            Q : Exit to Arcade Menu
-        </div>
+
         <p><br></p>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
@@ -138,7 +134,7 @@
     <!-- Pause Menu -->
     <div id="pause-menu" class="overlay" style="display: none; background: rgba(0, 0, 15, 0.75);">
         <h2 style="color: #ffcc00; font-size: 40px; text-shadow: 4px 4px #000; animation: blink 1s infinite;">PAUSED</h2>
-        <div class="sub-message" style="font-size: 14px;">PRESS P OR FIRE TO RESUME<br><br>ESC TO QUIT TO MENU</div>
+        <div class="sub-message" style="font-size: 14px;">PRESS CTRL+P OR FIRE TO RESUME<br><br>ESC TO QUIT TO MENU</div>
     </div>
 
     <!-- High Score Menu -->
@@ -988,6 +984,11 @@
         }
 
         function onKeyDown(e) {
+            // Prevent default browser print menu for Ctrl+P
+            if (e.ctrlKey && e.code === 'KeyP') {
+                e.preventDefault();
+            }
+
             // Arcade Cabinet Exit Mapping (Q Key)
             if (e.code === 'KeyQ') {
                 window.location.href = '/'; // Adjust this URL to match your overarching arcade frontend path
@@ -1031,7 +1032,7 @@
             }
 
             if (state === 'PLAYING') {
-                if (e.code === 'KeyP') {
+                if (e.code === 'KeyP' || (e.ctrlKey && e.code === 'KeyP')) {
                     state = 'PAUSED';
                     ui.pauseMenu.style.display = 'flex';
                     return;
@@ -1042,7 +1043,8 @@
                     return;
                 }
             } else if (state === 'PAUSED') {
-                if (e.code === 'KeyP' || e.code === 'Space' || e.code === 'Enter') {
+                // Resume game with P, Ctrl+P, Space, or Enter
+                if (e.code === 'KeyP' || (e.ctrlKey && e.code === 'KeyP') || e.code === 'Space' || e.code === 'Enter') {
                     state = 'PLAYING';
                     ui.pauseMenu.style.display = 'none';
                     return;
