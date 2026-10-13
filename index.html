@@ -112,7 +112,7 @@
         </div>
         <div class="hud-bottom">
             <div id="health-display">HEALTH: 100%</div>
-            <div id="camera-display">CAM: 3RD-PERSON [C]</div>
+            <div id="camera-display">CAM: 3RD-PERSON [V]</div>
         </div>
         <div id="crosshair"></div>
     </div>
@@ -121,12 +121,35 @@
     <div id="start-menu" class="overlay">
         <img class="logo-img" src="logosmall.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none'; document.getElementById('fallback-title').style.display='block';">
         <div id="fallback-title" class="logo-img" style="display:none; font-size: 48px; color: #00ffff; text-shadow: 4px 4px 0px #ff00ff, 8px 8px 0px #000;">SPACE SHOOT 3D</div>
-        <p><BR>
+        <p><br></p>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-        <p><BR>
+        <div class="sub-message" style="line-height: 2;">
+            ARROWS/JOYSTICK : Navigate | SPACE (FIRE) : Shoot<br>
+            V : Change View | P : Pause | ESC : Quit<br>
+            R / SPACE : Start Game | H : High Scores<br>
+            Q : Exit to Arcade Menu
+        </div>
+        <p><br></p>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="overlay" style="display: none; background: rgba(0, 0, 15, 0.75);">
+        <h2 style="color: #ffcc00; font-size: 40px; text-shadow: 4px 4px #000; animation: blink 1s infinite;">PAUSED</h2>
+        <div class="sub-message" style="font-size: 14px;">PRESS P OR FIRE TO RESUME<br><br>ESC TO QUIT TO MENU</div>
+    </div>
+
+    <!-- High Score Menu -->
+    <div id="high-score-menu" class="overlay" style="display: none;">
+        <h2 style="color: #00ffff; font-size: 32px; text-shadow: 4px 4px #000; margin-bottom: 20px;">HALL OF FAME</h2>
+        <div class="hof-table" style="background: rgba(0,0,0,0.8); border-color: #00ffff;">
+            <div id="hs-list-only">
+                <!-- JS Populates High Scores Here -->
+            </div>
+        </div>
+        <div class="sub-message" style="margin-top: 30px; font-size: 14px; animation: blink 1.5s infinite;">PRESS ANY KEY TO RETURN</div>
     </div>
 
     <!-- Arcade Joystick Name Entry Menu -->
@@ -146,7 +169,6 @@
         <img class="logo-img" src="logo.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
         <div class="logo-img" style="color: #ff0000; font-size:40px; font-weight:bold; text-shadow: 4px 4px 0px #550000; margin-top: 20px;">SHIP DESTROYED</div>
         <div class="message" id="final-score">SCORE: 0</div>
-        <button id="restart-btn">RETRY</button>
     </div>
 
     <div id="level-transition" class="overlay">
@@ -181,7 +203,6 @@
                 <img class="credits-logo" src="logofull.png" alt="SPACE SHOOT 3D" onerror="this.style.display='none';">
             </div>
         </div>
-        <button id="credits-restart-btn" style="position: absolute; bottom: 40px; z-index: 100;">MAIN MENU</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -225,7 +246,7 @@
         const SHIP_SPEED = 45;
         const FIRE_RATE = 0.14;
         
-        let state = 'MENU'; // MENU, PLAYING, TRANSITION, INTRO_CINEMATIC, CINEMATIC, CREDITS, NAME_ENTRY, ROUTING, DEMO
+        let state = 'MENU'; // MENU, PLAYING, PAUSED, TRANSITION, INTRO_CINEMATIC, CINEMATIC, CREDITS, HIGH_SCORES, NAME_ENTRY, ROUTING, DEMO
         let score = 0;
         let health = 100;
         let level = 1;
@@ -285,6 +306,9 @@
             start: document.getElementById('start-menu'),
             over: document.getElementById('game-over-menu'),
             nameEntry: document.getElementById('name-entry-menu'),
+            pauseMenu: document.getElementById('pause-menu'),
+            highScoreMenu: document.getElementById('high-score-menu'),
+            hsListOnly: document.getElementById('hs-list-only'),
             hud: document.getElementById('hud'),
             score: document.getElementById('score-display'),
             highScore: document.getElementById('high-score-hud'),
@@ -299,8 +323,7 @@
             hofList: document.getElementById('hall-of-fame-list'),
             camMode: document.getElementById('camera-display'),
             btnStart: document.getElementById('start-btn'),
-            btnRestart: document.getElementById('restart-btn'),
-            btnCreditsRestart: document.getElementById('credits-restart-btn')
+            btnRestart: document.getElementById('restart-btn')
         };
 
         function generatePixelTexture(type) {
@@ -437,7 +460,6 @@
 
             if(ui.btnStart) ui.btnStart.addEventListener('click', () => startLevel(1));
             if(ui.btnRestart) ui.btnRestart.addEventListener('click', () => startLevel(1));
-            if(ui.btnCreditsRestart) ui.btnCreditsRestart.addEventListener('click', resetToMenu);
 
             clock = new THREE.Clock(); animate();
         }
@@ -469,7 +491,7 @@
 
         function toggleCameraMode() {
             cameraView = cameraView === '3RD' ? '1ST' : '3RD'; cockpitMesh.visible = cameraView === '1ST'; playerShip.visible = cameraView === '3RD';
-            ui.camMode.innerText = `CAM: ${cameraView}-PERSON [C]`; updateCameraPosition();
+            ui.camMode.innerText = `CAM: ${cameraView}-PERSON [V]`; updateCameraPosition();
         }
         function updateCameraPosition() { camera.position.set(0, cameraView === '3RD' ? 5 : 0, cameraView === '3RD' ? 45 : 18); }
 
@@ -628,6 +650,7 @@
             state = 'MENU'; ui.credits.style.display = 'none'; ui.start.style.display = 'flex'; 
             ui.hud.style.display = 'none'; ui.over.style.display = 'none'; ui.nameEntry.style.display = 'none';
             document.getElementById('demo-overlay').style.display = 'none';
+            ui.highScoreMenu.style.display = 'none'; ui.pauseMenu.style.display = 'none';
             
             playerShip.scale.setScalar(1); playerShip.position.set(0, -15, 15); playerShip.rotation.set(0, 0, 0);
             stopAllMusic(); 
@@ -639,6 +662,16 @@
             [...lasers, ...enemies, ...particles, ...energyPods].forEach(obj => scene.remove(obj.mesh));
             lasers.length = 0; enemies.length = 0; particles.length = 0; energyPods.length = 0;
             earthSprite.visible = false; moonSprite.visible = false; asteroidFieldGrp.visible = false;
+        }
+
+        function showHighScores() {
+            state = 'HIGH_SCORES';
+            ui.start.style.display = 'none';
+            ui.highScoreMenu.style.display = 'flex';
+            ui.hsListOnly.innerHTML = '';
+            highScores.forEach((hs, index) => { 
+                ui.hsListOnly.innerHTML += `<div class="hof-row"><span>${index+1}. ${hs.name}</span><span>${hs.score}</span></div>`; 
+            });
         }
 
         function startLevel(lvlNum) {
@@ -772,6 +805,19 @@
         }
 
         function update(dt) {
+            // Attract Mode & High Score Timeout Logic
+            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_ENTRY' || state === 'ROUTING' || state === 'HIGH_SCORES') {
+                if (state === 'MENU') {
+                    attractTimer += dt;
+                    if (attractTimer > 15) startDemo(); // Launch demo after 15 seconds idle
+                } else {
+                    attractTimer = 0;
+                }
+                return; // Skip active gameplay updates
+            }
+
+            if (state === 'PAUSED') return; // Freeze entirely if paused
+
             if (isScreenShaking > 0) {
                 isScreenShaking -= dt * 3;
                 camera.position.x += (Math.random() - 0.5) * isScreenShaking * 3.5; camera.position.y += (Math.random() - 0.5) * isScreenShaking * 3.5;
@@ -790,17 +836,6 @@
 
             if(asteroidFieldGrp.visible) {
                 asteroidFieldGrp.children.forEach(rock => { rock.position.z += 175 * dt; if(rock.position.z > 60) { rock.position.z = -700; rock.position.x = (Math.random()-0.5)*260; } });
-            }
-
-            // Attract Mode Logic
-            if (state === 'MENU' || state === 'CREDITS' || state === 'NAME_ENTRY' || state === 'ROUTING') {
-                if (state === 'MENU') {
-                    attractTimer += dt;
-                    if (attractTimer > 15) startDemo(); // Launch demo after 15 seconds idle
-                }
-                return; // Skip active gameplay updates
-            } else {
-                attractTimer = 0;
             }
 
             if (state === 'INTRO_CINEMATIC') {
@@ -961,8 +996,18 @@
 
             interruptDemo(); // Any keypress kills demo mode
 
+            if (state === 'HIGH_SCORES') {
+                resetToMenu();
+                return;
+            }
+
             if (state === 'MENU') {
-                if (e.code === 'Space' || e.code === 'Enter') {
+                if (e.code === 'KeyH') {
+                    showHighScores();
+                    return;
+                }
+                // R Button (1 Player) or Space/Enter (FIRE) triggers start!
+                if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyR') {
                     if (!audioInteracted) {
                         audioInteracted = true;
                         playMusic('menuMusic');
@@ -973,7 +1018,7 @@
             }
 
             if (state === 'CREDITS') {
-                if (e.code === 'Space' || e.code === 'Enter') { resetToMenu(); return; }
+                if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyR' || e.code === 'Escape') { resetToMenu(); return; }
             }
 
             if (state === 'NAME_ENTRY') {
@@ -985,13 +1030,41 @@
                 updateNameEntryUI(); return; 
             }
 
+            if (state === 'PLAYING') {
+                if (e.code === 'KeyP') {
+                    state = 'PAUSED';
+                    ui.pauseMenu.style.display = 'flex';
+                    return;
+                }
+                // Esc (2 Player button) quits back to menu from active game
+                if (e.code === 'Escape') {
+                    resetToMenu();
+                    return;
+                }
+            } else if (state === 'PAUSED') {
+                if (e.code === 'KeyP' || e.code === 'Space' || e.code === 'Enter') {
+                    state = 'PLAYING';
+                    ui.pauseMenu.style.display = 'none';
+                    return;
+                }
+                if (e.code === 'Escape') {
+                    ui.pauseMenu.style.display = 'none';
+                    resetToMenu();
+                    return;
+                }
+            }
+
+            // Gameplay Controls
             if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.w = true;
             if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.a = true;
             if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.s = true;
             if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
             if (e.code === 'Space') keys.space = true;
-            if (e.code === 'KeyC') toggleCameraMode();
+            
+            // View toggle
+            if (e.code === 'KeyV' && (state === 'PLAYING' || state === 'PAUSED' || state === 'DEMO')) toggleCameraMode();
 
+            // Developer Cheats
             if (e.code === 'Digit9') startLevel(9); 
             if (e.code === 'Digit8') startLevel(10); 
             if (e.code === 'Digit0') { state='CINEMATIC'; playerShip.position.z = 0; }
