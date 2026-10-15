@@ -124,12 +124,7 @@
         <p><br></p>
         <div class="message">PREPARE FOR BATTLE</div>
         <button id="start-btn">START GAME</button>
-        <div class="sub-message" style="line-height: 2;">
-            ARROWS/JOYSTICK : Navigate | SPACE (FIRE) : Shoot<br>
-            V : Change View | CTRL+P : Pause | ESC : Quit<br>
-            R / SPACE : Start Game | H : High Scores<br>
-            Q : Exit to Arcade Menu
-        </div>
+
         <p><br></p>
         <div class="brand-credit"></div>
         <img class="logo2-img" src="NWS.png" alt="NWS">
@@ -240,7 +235,9 @@
             timeToDoDamage: 'timetododamage.mp3',
             granEnergyPods: 'granenergypods.mp3',
             moonSiege: 'moonsiege.mp3',
-            finalMission: 'finalmission.mp3'
+            finalMission: 'finalmission.mp3',
+            hugeSpiders: 'hugepsiders.mp3',
+            madNow: 'madnow.mp3'
         };
 
         // --- Game Constants & Variables ---
@@ -736,6 +733,8 @@
                         else if (level === 5) playMusic('watchItFiring');
                         else if (level === 6) playMusic('watchItFiring');
                         else if (level === 8) playMusic('timeToDoDamage');
+                        else if (level === 9) playMusic('hugeSpiders');
+                        else if (level === 10) playMusic('granEnergyPods');
                         else if (level === 11) playMusic('moonSiege');
                         else if (level === 12) playMusic('finalMission');
                     }
@@ -760,6 +759,7 @@
                 if (level === 1 && killsInLevel >= 4) { playMusic('lEnergyPods'); voPlayed = true; }
                 else if (level === 5 && killsInLevel >= 6) { playMusic('granEnergyPods'); voPlayed = true; }
                 else if (level === 7 && killsInLevel >= 6) { playMusic('lEnergyPods'); voPlayed = true; }
+                else if (level === 10 && killsInLevel >= 7) { playMusic('madNow'); voPlayed = true; }
                 else if (level === 11 && killsInLevel >= 6) { playMusic('granEnergyPods'); voPlayed = true; }
             }
 
